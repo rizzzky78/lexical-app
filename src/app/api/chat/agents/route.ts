@@ -1,6 +1,7 @@
 import { streamText } from "ai";
 import { google } from "@ai-sdk/google";
 import { ROOT_SYSTEM_INSTRUCTION } from "@/lib/agents/system-instruction/root-agents";
+import { rootTools } from "@/lib/agents/tools/root";
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -11,8 +12,9 @@ export async function POST(req: Request) {
     model: google("gemini-1.5-pro"),
     system: ROOT_SYSTEM_INSTRUCTION(currentDate),
     maxSteps: 5,
-    tools: {},
+    tools: rootTools,
     messages,
+    experimental_toolCallStreaming: true
   });
 
   return stream.toDataStreamResponse();
