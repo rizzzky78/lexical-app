@@ -23,3 +23,14 @@ export const multiModalModels = [
   "google:learnlm-1.5-pro-experimental",
   "azure:gpt-4o",
 ] as const;
+
+export function createModelId(model: LLModels): string {
+  return `${model.providerId}:${model.id}`;
+}
+
+export function getDefaultModelId(models: LLModels[]): string {
+  if (!models.length) {
+    throw new Error("No models available");
+  }
+  return createModelId(models[0]);
+}
