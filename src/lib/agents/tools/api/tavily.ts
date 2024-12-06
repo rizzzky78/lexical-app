@@ -7,7 +7,7 @@ import type {
   TavilyExtractResponse,
 } from "@/lib/types/tavily";
 import { timestampDate } from "@/lib/utility/date/root";
-import logger from "@/lib/utility/logger/logger";
+import logger from "@/lib/utility/logger/root";
 import { tavily } from "@tavily/core";
 
 /**
