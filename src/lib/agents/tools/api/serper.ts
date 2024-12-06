@@ -1,26 +1,17 @@
 import { getEnv } from "@/lib/utils";
-import { z } from "zod";
 import { serperRequestSchema } from "../schema/serper";
 import logger from "@/lib/utility/logger/root";
 import {
+  Req,
   SerperImageResults,
   SerperNewsResults,
+  SerperOptions,
   SerperPlaceResults,
   SerperRequestConfig,
   SerperSearchResults,
   SerperShoppingResults,
   SerperVideoResults,
 } from "@/lib/types/serper";
-
-// Type alias for request
-type Req = z.infer<typeof serperRequestSchema>;
-
-// Options for Serper client initialization
-type SerperOptions = {
-  apikey?: string;
-  timeout?: number;
-  retries?: number;
-};
 
 // Custom error for Serper-specific exceptions
 class SerperError extends Error {

@@ -233,3 +233,13 @@ export interface SerperResultsResponse<T = SerperResponse> {
   type: SerperSearchType;
   data: T;
 }
+
+// Type alias for request
+export type Req = z.infer<typeof serperRequestSchema>;
+
+// Options for Serper client initialization
+export type SerperOptions = {
+  apikey?: string;
+  timeout?: number;
+  retries?: number;
+};
