@@ -4,6 +4,7 @@ import {
   crawlOptionSchema,
   mapOptionSchema,
 } from "@/lib/agents/tools/schema/firecrawl";
+import { z } from "zod";
 
 // Type aliases for improved readability
 export type RequestProperties = z.infer<typeof firecrawlInputSchema>;

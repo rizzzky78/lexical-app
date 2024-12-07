@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { serperRequestSchema } from "../agents/tools/schema/serper";
+
 /**
  * Core enums and constants
  */
