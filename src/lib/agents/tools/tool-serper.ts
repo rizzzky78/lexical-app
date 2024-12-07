@@ -13,7 +13,7 @@ export const serperSearch = tool({
 
     const contentResult = await serper.search(request);
 
-    logger.info("Done using Tavily Search tool", {
+    logger.info("Done using Serper Search tool", {
       isHasValue: contentResult ? true : false,
     });
 
