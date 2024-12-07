@@ -97,11 +97,11 @@ export class FireCrawlClient {
   private async handleResponse(prop: RequestProperties) {
     switch (prop.action) {
       case FirecrawlAction.Scrape:
-        return this.handleScrape(prop.scrapeOptions!);
+        return await this.handleScrape(prop.scrapeOptions!);
       case FirecrawlAction.Crawl:
-        return this.handleCrawl(prop.crawlOptions!);
+        return await this.handleCrawl(prop.crawlOptions!);
       case FirecrawlAction.Map:
-        return this.handleMap(prop.mapOptions!);
+        return await this.handleMap(prop.mapOptions!);
       default:
         throw new FirecrawlError("Invalid action type", {
           action: prop.action,
