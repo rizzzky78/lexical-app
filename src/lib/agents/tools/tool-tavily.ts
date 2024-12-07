@@ -32,10 +32,14 @@ export const tavilySearch = tool({
   description: TOOL_DESCRIPTION,
   parameters: tavilySearchSchema,
   execute: async ({ query, options }) => {
-    try {
-      return await tavilySearchClient.search(query, options);
-    } catch (error) {
-      logger.error("Error!");
-    }
+    logger.info("Using Tavily Search tool", { query });
+
+    const contentResult = await tavilySearchClient.search(query, options);
+
+    logger.info("Done using Tavily Search tool", {
+      isHasValue: contentResult ? true : false,
+    });
+
+    return contentResult ?? "An error occured or search doesn't return value!";
   },
 });
