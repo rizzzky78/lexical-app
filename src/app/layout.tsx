@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Noto_Serif } from "next/font/google";
+import { Header } from "@/components/atlas/header";
+import { ThemeProvider } from "@/components/provider/theme-provider";
 
 const notoSerif = Noto_Serif({
   weight: "300",
@@ -74,10 +76,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head />
       <body className={cn(`${notoSerif.className} antialiased`)}>
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

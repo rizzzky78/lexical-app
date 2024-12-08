@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   );
 
   const stream = streamText({
-    model: xai('grok-vision-beta'),
+    model: google('gemini-1.5-pro'),
     system: ROOT_SYSTEM_INSTRUCTION(currentDate),
     maxSteps: 5,
     // tools: rootTools,
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
         JSON.stringify(prop, null, 2)
       );
     },
+    experimental_continueSteps: true
   });
 
   return stream.toDataStreamResponse();

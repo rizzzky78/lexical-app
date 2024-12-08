@@ -1,6 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { BotMessage } from "@/components/atlas/ai-message";
+import { MarkdownRenderer } from "@/components/atlas/markdown-renderer";
+import { UserMessage } from "@/components/atlas/user-message";
 import { useChat } from "ai/react";
 import { useRef, useState } from "react";
 
@@ -18,7 +21,13 @@ export default function Page() {
       <div>
         {messages.map((message) => (
           <div key={message.id}>
-            <div>{`${message.role}: `}</div>
+            {message.role === "assistant" ? (
+              <MarkdownRenderer content={message.content} />
+            ) : message.role === "user" ? (
+              <UserMessage message={message.content} />
+            ) : (
+              <p>{message.content}</p>
+            )}
 
             <div>
               <div>
@@ -31,11 +40,10 @@ export default function Page() {
                       key={`${message.id}-${index}`}
                       src={attachment.url}
                       alt={attachment.name}
-                      className="w-fit object-cover bg-black"
+                      className="w-fit object-cover rounded-lg"
                     />
                   ))}
               </div>
-              <p>{message.content}</p>
             </div>
           </div>
         ))}

@@ -6,11 +6,10 @@
 import { FC, memo } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { coldarkDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-
-import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard";
 import { Button } from "@/components/ui/button";
 import { generateId } from "ai";
 import { Check, Copy, Download } from "lucide-react";
+import { useCopyToClipboard } from "@/lib/hooks/use-copy-clipboard";
 
 interface Props {
   language: string;
@@ -57,7 +56,7 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
     }
     const fileExtension = programmingLanguages[language] || ".file";
     const suggestedFileName = `file-${generateId()}${fileExtension}`;
-    const fileName = window.prompt("Enter file name" || "", suggestedFileName);
+    const fileName = window.prompt("Enter file name", suggestedFileName);
 
     if (!fileName) {
       // User pressed cancel on prompt.

@@ -44,7 +44,7 @@ export function BotMessage({ content }: { content: string }) {
       className="prose-sm prose-neutral prose-a:text-accent-foreground/50"
       components={{
         // Add table components
-        table({ node, children, ...props }) {
+        table({ children, ...props }) {
           return (
             <table className="border-collapse w-full my-4" {...props}>
               {children}
