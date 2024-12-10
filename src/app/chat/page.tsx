@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { BotMessage } from "@/components/atlas/ai-message";
 import { MarkdownRenderer } from "@/components/atlas/markdown-renderer";
 import { UserMessage } from "@/components/atlas/user-message";
 import { useChat } from "ai/react";
@@ -17,7 +16,7 @@ export default function Page() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="px-8 sm:px-12 pt-12 md:pt-14 pb-14 md:pb-24 max-w-3xl mx-auto flex flex-col space-y-3 md:space-y-4">
+    <div className="px-8 sm:px-12 pt-12 md:pt-14 pb-14 md:pb-24 max-w-3xl mx-auto flex flex-col space-y-  3 md:space-y-4">
       <div>
         {messages.map((message) => (
           <div key={message.id}>
