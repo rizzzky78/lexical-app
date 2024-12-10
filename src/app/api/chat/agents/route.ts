@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     model: google('gemini-1.5-pro'),
     system: ROOT_SYSTEM_INSTRUCTION(currentDate),
     maxSteps: 5,
-    // tools: rootTools,
+    tools: rootTools,
     messages,
     onFinish: async (prop) => {
       fs.writeFileSync(

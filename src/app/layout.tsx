@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Noto_Serif } from "next/font/google";
-import { Header } from "@/components/atlas/header";
+import Header from "@/components/atlas/header";
 import { ThemeProvider } from "@/components/provider/theme-provider";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const notoSerif = Noto_Serif({
   weight: "300",
@@ -85,8 +86,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          {children}
+          {/* <Header /> */}
+          <SidebarProvider>{children}</SidebarProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,8 +1,20 @@
-/* eslint-disable @next/next/no-html-link-for-pages */
-/* eslint-disable @next/next/no-img-element */
-import React from "react";
-import { cn } from "@/lib/utils";
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  Moon,
+  Sun,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useScrollDirection } from "@/lib/hooks/use-scroll-direction";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,86 +23,167 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  User,
-  History,
-  LogOut,
-  LayoutPanelLeft,
-  SquareUserRound,
-} from "lucide-react";
-import { getServerSession } from "next-auth";
-import { signOut } from "next-auth/react";
-import { ToggleTheme } from "./toggle-theme";
+import { useTheme } from "next-themes";
 
-export const Header: React.FC = async () => {
-  const session = await getServerSession();
+export default function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const scrollDirection = useScrollDirection();
+
   return (
-    <div className="w-full flex justify-center">
-      <header className="fixed px-5 w-full md:max-w-screen-2xl p-1 flex justify-between items-center z-10 backdrop-blur md:backdrop-blur-none bg-background/80 md:bg-transparent">
-        <div>
-          <a href="/" className="flex items-center space-x-2">
-            {/* <IconLogo className={cn("w-5 h-5")} /> */}
-            <span className="font-semibold text-lg hidden md:inline">
-              Morphix
+    <header
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"
+      } mx-auto `}
+    >
+      <div className="container mx-auto flex h-16 items-center justify-between rounded-b-xl bg-background px-4 shadow-md">
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center space-x-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
+            <span className="hidden text-xl font-bold sm:inline-block">
+              AppName
             </span>
-          </a>
+          </Link>
         </div>
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <div className="flex items-center space-x-4">
+          <div className="hidden md:block">
+            <UserMenu />
+          </div>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
               <Button
                 variant="ghost"
-                size="icon"
-                className="rounded-full hover:scale-105 hover:border-none hover:bg-background focus-visible:border-none focus:border-none focus-within:border-none"
+                className="h-8 w-8 rounded-full md:hidden"
               >
-                <LayoutPanelLeft className="hover:rotate-180 transition-all h-5 w-5" />
-                <span className="sr-only">User menu</span>
+                <Menu className="h-4 w-4" />
+                <span className="sr-only">Toggle menu</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-full *:text-xs rounded-none"
-            >
-              <DropdownMenuLabel className="flex items-center space-x-2">
-                {session?.user?.image ? (
-                  <img
-                    src={session?.user?.image as string}
-                    alt={"user_profile_picture"}
-                    className="object-cover h-7 w-7 rounded-full"
-                  />
-                ) : (
-                  <SquareUserRound className="h-7 w-7" />
-                )}
-                <div className="flex flex-col">
-                  <p className="text-xs">{session?.user?.name}</p>
-                  <p className="text-[0.65rem] text-muted-foreground">
-                    {session?.user?.email}
-                  </p>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <nav className="flex flex-col space-y-4">
+                <Link
+                  href="/profile"
+                  className="flex items-center space-x-2 text-sm"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <User className="h-4 w-4" />
+                  <span>John Doe</span>
+                </Link>
+                <Link
+                  href="/email"
+                  className="flex items-center space-x-2 text-sm"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Mail className="h-4 w-4" />
+                  <span>john@example.com</span>
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center space-x-2 text-sm"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/logout"
+                  className="flex items-center space-x-2 text-sm"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Log out</span>
+                </Link>
+                <div className="md:hidden">
+                  <ThemeToggle />
                 </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <ToggleTheme />
-              <DropdownMenuItem>
-                <History className="mr-2 h-4 w-4" />
-                <span>History</span>
-                {/* I want to trigger the Sheet using this button */}
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Account</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                {/* <Logout className="flex items-center"> */}
-                <LogOut className="mr-2 h-4 w-4 text-[#FF6969]" />
-                <span>Log out</span>
-                {/* </Logout> */}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
-      </header>
-    </div>
+      </div>
+      <div className="fixed bottom-4 right-4 z-50 hidden md:block">
+        <ThemeToggle />
+      </div>
+    </header>
   );
-};
+}
 
-export default Header;
+function ThemeToggle({ className }: { className?: string }) {
+  const { setTheme, theme } = useTheme();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon" className={className}>
+          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          System
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function UserMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 rounded-full">
+          <User className="h-4 w-4" />
+          <span className="sr-only">Open user menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">John Doe</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              john@example.com
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <User className="mr-2 h-4 w-4" />
+          <span>Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Mail className="mr-2 h-4 w-4" />
+          <span>Email</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <LayoutDashboard className="mr-2 h-4 w-4" />
+          <span>Dashboard</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
