@@ -14,5 +14,10 @@ type Chunk = {
 };
 
 export const toolContainer = (model: string, chunk: Chunk) => {
-  return {};
+  return {
+    tavilySearch, serperSearch, fireCrawlExtraction
+  }
 };
+
+
+export type FunctionToolsName = keyof ReturnType<typeof toolContainer>
