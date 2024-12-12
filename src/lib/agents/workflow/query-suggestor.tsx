@@ -51,7 +51,5 @@ export async function querySuggestor({
     }
   }
 
-  return {
-    relatedQuery: await object,
-  };
+  return await object;
 }

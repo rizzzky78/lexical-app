@@ -5,9 +5,9 @@ import { FunctionToolsName } from "../agents/tools/root";
 export type ChatProperties = {
   id: string;
   title: string;
-  created: string;
+  created: Date;
   userId: string;
-  messages: MessageProperty;
+  messages: MessageProperty[];
   sharePath?: string;
   modelUsed: string;
 } & Record<string, any>;
@@ -15,7 +15,7 @@ export type ChatProperties = {
 export type UIState = {
   id: string;
   component: ReactNode;
-};
+}[]
 
 export type AIState = {
   chatId: string;
@@ -35,7 +35,7 @@ export type UserMessageType =
 export type AssistantMessageType =
   | "answer"
   | "related"
-  | "followup"
+  | "followup-panel"
   | "markdown"
   | "tool"
   | "end";
@@ -52,6 +52,16 @@ export type ActionsType = "sendMessage" | "streamMessage";
 
 export type UseAction = {
   submitMessage: (
-    userMessage: CoreMessage
-  ) => Promise<{ chatId: string; component: ReactNode }>;
+    payload: SubmitMessagePayload
+  ) => Promise<{ id: string; component: ReactNode }>;
+};
+
+export type SubmitMessagePayload = {
+  message: CoreMessage;
+  userId: string;
+  model: string;
+  messageType: UserMessageType;
+  enableRelated?: {
+    scopeRelated?: "last-message" | "overall";
+  };
 };

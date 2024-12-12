@@ -1,16 +1,14 @@
 import { AI } from "@/app/action";
-import { MessageProperty, UserMessageType } from "@/lib/types/ai";
+import {
+  MessageProperty,
+  SubmitMessagePayload,
+  UserMessageType,
+} from "@/lib/types/ai";
 import { CoreMessage, CoreUserMessage, generateId } from "ai";
 import { createStreamableUI, getMutableAIState } from "ai/rsc";
 import { agent } from "./root";
-
-type SubmitMessagePayload = {
-  message: CoreMessage;
-  userId: string;
-  model: string;
-  messageType: UserMessageType;
-  enableRelated?: boolean;
-};
+import { querySuggestor } from "./query-suggestor";
+import { RelatedQuery } from "../schema/related-query";
 
 export async function submitMessage(payload: SubmitMessagePayload) {
   "use server";
@@ -31,7 +29,7 @@ export async function submitMessage(payload: SubmitMessagePayload) {
   const messages = aiMessages
     .filter(
       (m) =>
-        m.messageType !== "followup" &&
+        m.messageType !== "followup-panel" &&
         m.messageType !== "related" &&
         m.messageType !== "end"
     )
@@ -49,6 +47,7 @@ export async function submitMessage(payload: SubmitMessagePayload) {
           id: generateId(),
           role,
           content,
+          messageType,
         },
       ],
     });
@@ -94,4 +93,56 @@ export async function submitMessage(payload: SubmitMessagePayload) {
       ],
     },
   ];
+
+  const enableRelated = payload.enableRelated;
+
+  if (enableRelated?.scopeRelated) {
+    const relatedQuery = await querySuggestor({
+      model,
+      uiStream,
+      messages: assistantMessageAnswer,
+      scope: enableRelated.scopeRelated,
+    });
+
+    aiState.update({
+      ...aiState.get(),
+      messages: [
+        ...aiState.get().messages,
+        {
+          id: generateId(),
+          role: "assistant",
+          messageType: "related",
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(relatedQuery),
+            },
+          ],
+        },
+      ],
+    });
+  }
+
+  // add UI for follow up panel
+  uiStream.append(<div>FOLLOW UP PANEL</div>);
+
+  // save the state
+
+  aiState.done({
+    ...aiState.get(),
+    messages: [
+      ...aiState.get().messages,
+      {
+        id: generateId(),
+        role: "assistant",
+        messageType: "followup-panel",
+        content: "followup-panel",
+      },
+    ],
+  });
+
+  return {
+    id: generateId(),
+    component: uiStream.value,
+  };
 }
