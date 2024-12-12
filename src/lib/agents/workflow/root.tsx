@@ -1,5 +1,10 @@
 import { google } from "@ai-sdk/google";
-import { CoreMessage, streamText } from "ai";
+import {
+  CoreAssistantMessage,
+  CoreMessage,
+  CoreToolMessage,
+  streamText,
+} from "ai";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { toolContainer } from "../tools/root";
 import { AnswerSection } from "@/components/kratos/ai-message";
@@ -12,11 +17,12 @@ interface RootAgentPayload {
 
 export async function agent({ model, messages, uiStream }: RootAgentPayload) {
   let fullResponse: string = "";
+  let responseMessages: (CoreAssistantMessage | CoreToolMessage)[] = [];
   let toolResults: Record<string, any>[] = [];
 
   const streamableText = createStreamableValue<string>("");
 
-  const { fullStream } = await streamText({
+  const { fullStream, response } = streamText({
     model: google("gemini-1.5-pro"),
     messages,
     maxSteps: 10,
@@ -31,7 +37,8 @@ export async function agent({ model, messages, uiStream }: RootAgentPayload) {
         }
       }
     },
-    onFinish: async () => {
+    onFinish: async (finishedResult) => {
+      responseMessages = finishedResult.response.messages;
       streamableText.done(fullResponse);
     },
   });
@@ -46,6 +53,10 @@ export async function agent({ model, messages, uiStream }: RootAgentPayload) {
   const payload = {
     model,
     text: fullResponse,
+    /**
+     * The response messages that were generated during the call. It consists of an assistant message, potentially containing tool calls.
+     */
+    responseMessages,
     toolResults,
   };
 

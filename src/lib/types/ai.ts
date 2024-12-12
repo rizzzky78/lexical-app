@@ -9,6 +9,7 @@ export type ChatProperties = {
   userId: string;
   messages: MessageProperty;
   sharePath?: string;
+  modelUsed: string;
 } & Record<string, any>;
 
 export type UIState = {
@@ -18,7 +19,7 @@ export type UIState = {
 
 export type AIState = {
   chatId: string;
-  messages: CoreMessage[];
+  messages: MessageProperty[];
   isSharedPage?: boolean;
 };
 
