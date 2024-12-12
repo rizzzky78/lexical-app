@@ -4,7 +4,7 @@ import {
   SubmitMessagePayload,
   UserMessageType,
 } from "@/lib/types/ai";
-import { CoreMessage, CoreUserMessage, generateId } from "ai";
+import { CoreMessage, generateId } from "ai";
 import { createStreamableUI, getMutableAIState } from "ai/rsc";
 import { agent } from "./root";
 import { querySuggestor } from "./query-suggestor";
@@ -70,7 +70,7 @@ export async function submitMessage(payload: SubmitMessagePayload) {
       role: v.role,
       content: v.content,
       messageType: "answer",
-      toolName: v.role === "tool" ? v.content[0].toolName : undefined,
+      toolName: v.role === 'tool' ? v.content[0].toolName : undefined,
     } as MessageProperty;
   });
 

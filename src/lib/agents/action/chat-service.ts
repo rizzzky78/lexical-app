@@ -122,7 +122,7 @@ export async function clearChats(
   redirect("/chat");
 }
 
-export async function saveChat(chat: ChatProperties, userId: string) {
+export async function saveChat(userId: string, chat: ChatProperties) {
   if (!userId) {
     userId = "anonymous";
   }

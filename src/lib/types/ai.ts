@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { FunctionToolsName } from "../agents/tools/root";
 
 export type ChatProperties = {
-  id: string;
+  chatId: string;
   title: string;
   created: Date;
   userId: string;
@@ -15,7 +15,7 @@ export type ChatProperties = {
 export type UIState = {
   id: string;
   component: ReactNode;
-}[]
+}[];
 
 export type AIState = {
   chatId: string;
@@ -25,6 +25,7 @@ export type AIState = {
 
 export type UserMessageType =
   | "text_input"
+  | "text_input_attachment"
   | "related_input"
   | "inquiry_input"
   | "skip"
@@ -44,7 +45,7 @@ export type MessageProperty = {
   id: string;
   role: "user" | "assistant" | "system" | "function" | "data" | "tool";
   toolName?: FunctionToolsName | ({} & string);
-  messageType?: UserMessageType | AssistantMessageType;
+  messageType: UserMessageType | AssistantMessageType;
   content: CoreMessage["content"];
 };
 

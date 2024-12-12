@@ -31,7 +31,7 @@ export async function agent({ model, messages, uiStream }: RootAgentPayload) {
       if (e.stepType === "initial") {
         if (e.toolCalls && e.toolCalls.length > 0) {
           uiStream.append(<AnswerSection text={streamableText.value} />);
-          toolResults = e.toolCalls;
+          toolResults = e.toolCalls
         } else {
           uiStream.append(<AnswerSection text={streamableText.value} />);
         }

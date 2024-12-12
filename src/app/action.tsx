@@ -1,10 +1,17 @@
 import { CoreUserMessage, generateId, TextPart } from "ai";
 
-import { createAI } from "ai/rsc";
-import { AIState, ChatProperties, MessageProperty, UIState, UseAction } from "@/lib/types/ai";
+import { createAI, getAIState } from "ai/rsc";
+import {
+  AIState,
+  ChatProperties,
+  MessageProperty,
+  UIState,
+  UseAction,
+} from "@/lib/types/ai";
 import { submitMessage } from "@/lib/agents/workflow/submit-message";
 import { getServerSession } from "next-auth";
 import { titleCrafter } from "@/lib/agents/workflow/title-crafter";
+import { saveChat } from "@/lib/agents/action/chat-service";
 
 const serverInitialAIState: AIState = {
   chatId: generateId(),
@@ -44,19 +51,26 @@ export const AI = createAI<AIState, UIState, UseAction>({
       ];
 
       const chat: ChatProperties = {
-        id: chatId,
+        chatId: chatId,
         created: new Date(),
-        modelUsed: '',
+        modelUsed: "",
         userId,
         title: chatTitle,
-        messages: updatedMessages
-      }
+        messages: updatedMessages,
+      };
+
+      await saveChat(userId, chat);
     }
   },
-  // onGetUIState: async () => {
-  //   const aiState = getAIState('user_message')
-  //   if (aiState) {
+  onGetUIState: async () => {
+    'use server'
 
-  //   }
-  // },
+    const aiState = getAIState()
+
+    if (aiState) {
+
+    } else {
+      return
+    }
+  }
 });
