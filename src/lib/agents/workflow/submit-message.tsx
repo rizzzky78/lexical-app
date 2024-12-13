@@ -10,8 +10,17 @@ import { agent } from "./root";
 import { querySuggestor } from "./query-suggestor";
 import { RelatedQuery } from "../schema/related-query";
 
+import fs from "fs";
+import { FollowupPanel } from "@/components/kratos/assistant-messages/followup-panel";
+
 export async function submitMessage(payload: SubmitMessagePayload) {
   "use server";
+
+  console.log(JSON.stringify(payload, null, 2));
+  fs.writeFileSync(
+    "./src/debug/state/submit-message-payoad.json",
+    JSON.stringify(payload, null, 2)
+  );
 
   const {
     userId,
@@ -23,6 +32,8 @@ export async function submitMessage(payload: SubmitMessagePayload) {
   const aiState = getMutableAIState<typeof AI>();
 
   const uiStream = createStreamableUI();
+
+  uiStream.append(<div>Loading...</div>);
 
   const aiMessages = [...aiState.get().messages];
 
@@ -55,8 +66,13 @@ export async function submitMessage(payload: SubmitMessagePayload) {
     messages.push(payload.message);
   }
 
+  console.log(
+    "from messages payload <submitMessage()> ",
+    JSON.stringify(messages, null, 2)
+  );
+
   // run the workflow
-  uiStream.append(<div>Loading...</div>);
+  uiStream.update(null);
 
   const { responseMessages, text, toolResults } = await agent({
     model,
@@ -64,13 +80,15 @@ export async function submitMessage(payload: SubmitMessagePayload) {
     uiStream,
   });
 
+  console.log("resulted text :", text);
+
   const filteredMessages = responseMessages.map((v) => {
     return {
       id: generateId(),
       role: v.role,
       content: v.content,
       messageType: "answer",
-      toolName: v.role === 'tool' ? v.content[0].toolName : undefined,
+      toolName: v.role === "tool" ? v.content[0].toolName : undefined,
     } as MessageProperty;
   });
 
@@ -124,7 +142,10 @@ export async function submitMessage(payload: SubmitMessagePayload) {
   }
 
   // add UI for follow up panel
-  uiStream.append(<div>FOLLOW UP PANEL</div>);
+  uiStream.append(<FollowupPanel />);
+
+  // done ui stream
+  uiStream.done();
 
   // save the state
 

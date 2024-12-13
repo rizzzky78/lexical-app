@@ -1,10 +1,12 @@
 import { FC } from "react";
 
-interface InquiryMessageProps {
+interface UserInquiryMessageProps {
   inquiry: any;
 }
 
-export const InquiryMessage: FC<InquiryMessageProps> = ({ inquiry }) => {
+export const UserInquiryMessage: FC<UserInquiryMessageProps> = ({
+  inquiry,
+}) => {
   return (
     <div>
       <div>CONTENT</div>

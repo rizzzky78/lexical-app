@@ -8,6 +8,8 @@ import {
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { toolContainer } from "../tools/root";
 import { AnswerSection } from "@/components/kratos/ai-message";
+import { groq } from "@ai-sdk/groq";
+import { AssistantMessage } from "@/components/kratos/assistant-messages/answer-message";
 
 interface RootAgentPayload {
   model: string;
@@ -20,20 +22,22 @@ export async function agent({ model, messages, uiStream }: RootAgentPayload) {
   let responseMessages: (CoreAssistantMessage | CoreToolMessage)[] = [];
   let toolResults: Record<string, any>[] = [];
 
+  console.log("from root agent :", JSON.stringify(messages, null, 2));
+
   const streamableText = createStreamableValue<string>("");
 
   const { fullStream, response } = streamText({
-    model: google("gemini-1.5-pro"),
+    model: google('gemini-1.5-pro-latest'),
     messages,
     maxSteps: 10,
     tools: toolContainer("not-set", { uiStream }),
     onStepFinish: async (e) => {
       if (e.stepType === "initial") {
         if (e.toolCalls && e.toolCalls.length > 0) {
-          uiStream.append(<AnswerSection text={streamableText.value} />);
-          toolResults = e.toolCalls
+          uiStream.append(<AssistantMessage content={streamableText.value} />);
+          toolResults = e.toolCalls;
         } else {
-          uiStream.append(<AnswerSection text={streamableText.value} />);
+          uiStream.append(<AssistantMessage content={streamableText.value} />);
         }
       }
     },

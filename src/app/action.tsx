@@ -12,6 +12,7 @@ import { submitMessage } from "@/lib/agents/workflow/submit-message";
 import { getServerSession } from "next-auth";
 import { titleCrafter } from "@/lib/agents/workflow/title-crafter";
 import { saveChat } from "@/lib/agents/action/chat-service";
+import { mapUIState } from "@/lib/agents/action/get-ui-state";
 
 const serverInitialAIState: AIState = {
   chatId: generateId(),
@@ -33,7 +34,7 @@ export const AI = createAI<AIState, UIState, UseAction>({
 
     const { chatId, messages } = state;
 
-    if (done) {
+    if (done) { 
       const session = await getServerSession();
       const userId = session?.user?.email || "anonymous";
 
@@ -63,14 +64,15 @@ export const AI = createAI<AIState, UIState, UseAction>({
     }
   },
   onGetUIState: async () => {
-    'use server'
+    "use server";
 
-    const aiState = getAIState()
+    const aiState = getAIState();
 
     if (aiState) {
-
+      const uiState = mapUIState(aiState as ChatProperties);
+      return uiState;
     } else {
-      return
+      return;
     }
-  }
+  },
 });

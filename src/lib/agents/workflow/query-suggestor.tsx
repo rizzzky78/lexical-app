@@ -1,7 +1,12 @@
 import { CoreMessage, streamObject } from "ai";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import { PartialRelated, relatedSchemaOutput } from "../schema/related-query";
+import {
+  PartialRelated,
+  RelatedQuery,
+  relatedSchemaOutput,
+} from "../schema/related-query";
 import { google } from "@ai-sdk/google";
+import { RelatedMessage } from "@/components/kratos/assistant-messages/related-message";
 
 type QuerySuggestorPayload = {
   model: string;
@@ -16,17 +21,25 @@ type QuerySuggestorPayload = {
   uiStream: ReturnType<typeof createStreamableUI>;
 };
 
+const SYSTEM_INSTRUCTION = `As a professional web researcher, your task is to generate a set of three queries that explore the subject matter more deeply, building upon the initial query and the information uncovered in its search results.
+
+For instance, if the original query was "Starship's third test flight key milestones", your output should follow this format:
+
+Aim to create queries that progressively delve into more specific aspects, implications, or adjacent topics related to the initial query. The goal is to anticipate the user's potential information needs and guide them towards a more comprehensive understanding of the subject matter.
+
+Please match the language of the response to the user's language.`;
+
 export async function querySuggestor({
   model,
   messages,
   scope = "last-message",
   uiStream,
-}: QuerySuggestorPayload) {
+}: QuerySuggestorPayload): Promise<RelatedQuery> {
   let finalRelatedQuery: PartialRelated = {};
 
   const streamableObject = createStreamableValue<PartialRelated>();
 
-  uiStream.append(<div>DATA</div>);
+  uiStream.append(<RelatedMessage related={streamableObject.value} />);
 
   const lastMessages = messages.slice(-1).map((m) => {
     return { ...m, role: "user" } as CoreMessage;
@@ -36,7 +49,7 @@ export async function querySuggestor({
 
   const { partialObjectStream, object } = streamObject({
     model: google("gemini-1.5-pro"),
-    system: ``,
+    system: SYSTEM_INSTRUCTION,
     messages: payloadMessages,
     schema: relatedSchemaOutput,
     onFinish: async (finishedResult) => {

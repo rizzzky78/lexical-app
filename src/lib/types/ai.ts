@@ -1,4 +1,4 @@
-import { CoreMessage } from "ai";
+import { CoreMessage, createDataStreamResponse } from "ai";
 import { ReactNode } from "react";
 import { FunctionToolsName } from "../agents/tools/root";
 
