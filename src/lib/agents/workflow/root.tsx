@@ -10,6 +10,7 @@ import { toolContainer } from "../tools/root";
 import { AnswerSection } from "@/components/kratos/ai-message";
 import { groq } from "@ai-sdk/groq";
 import { AssistantMessage } from "@/components/kratos/assistant-messages/answer-message";
+import { xai } from "@ai-sdk/xai";
 
 interface RootAgentPayload {
   model: string;
@@ -26,18 +27,17 @@ export async function agent({ model, messages, uiStream }: RootAgentPayload) {
 
   const streamableText = createStreamableValue<string>("");
 
+  uiStream.append(<AssistantMessage content={streamableText.value} />);
+
   const { fullStream, response } = streamText({
-    model: google('gemini-1.5-pro-latest'),
+    model: xai('grok-beta'),
     messages,
     maxSteps: 10,
-    tools: toolContainer("not-set", { uiStream }),
+    // tools: toolContainer("not-set", { uiStream }),
     onStepFinish: async (e) => {
       if (e.stepType === "initial") {
         if (e.toolCalls && e.toolCalls.length > 0) {
-          uiStream.append(<AssistantMessage content={streamableText.value} />);
           toolResults = e.toolCalls;
-        } else {
-          uiStream.append(<AssistantMessage content={streamableText.value} />);
         }
       }
     },

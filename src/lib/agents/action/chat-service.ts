@@ -118,8 +118,8 @@ export async function clearChats(
 
   await pipeline.exec();
 
-  revalidatePath("/chat");
-  redirect("/chat");
+  revalidatePath("/rsc");
+  redirect("/rsc");
 }
 
 export async function saveChat(userId: string, chat: ChatProperties) {

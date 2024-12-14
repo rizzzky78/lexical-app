@@ -3,6 +3,7 @@
 
 import { MarkdownRenderer } from "@/components/atlas/markdown-renderer";
 import { UserMessage } from "@/components/atlas/user-message";
+import { Markdown } from "@/components/kratos/markdown";
 import { useChat } from "ai/react";
 import { useRef, useState } from "react";
 
@@ -21,7 +22,7 @@ export default function Page() {
         {messages.map((message) => (
           <div key={message.id}>
             {message.role === "assistant" ? (
-              <MarkdownRenderer content={message.content} />
+              <Markdown>{message.content}</Markdown>
             ) : message.role === "user" ? (
               <UserMessage message={message.content} />
             ) : (
@@ -42,6 +43,15 @@ export default function Page() {
                       className="w-fit object-cover rounded-lg"
                     />
                   ))}
+              </div>
+              <div>
+                {message.toolInvocations?.map((tool, idx) => (
+                  <div key={idx} className="bg-gray-500 my-5">
+                    <pre className="text-xs overflow-x-auto">
+                      {JSON.stringify(tool, null, 2)}
+                    </pre>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

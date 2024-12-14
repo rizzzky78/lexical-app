@@ -34,7 +34,7 @@ export const AI = createAI<AIState, UIState, UseAction>({
 
     const { chatId, messages } = state;
 
-    if (done) { 
+    if (done) {
       const session = await getServerSession();
       const userId = session?.user?.email || "anonymous";
 
@@ -54,8 +54,8 @@ export const AI = createAI<AIState, UIState, UseAction>({
       const chat: ChatProperties = {
         chatId: chatId,
         created: new Date(),
-        modelUsed: "",
-        userId,
+        modelUsed: "not-set",
+        userId: userId ?? "anonymous",
         title: chatTitle,
         messages: updatedMessages,
       };

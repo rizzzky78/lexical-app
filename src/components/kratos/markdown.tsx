@@ -7,6 +7,13 @@ import rehypeRaw from "rehype-raw";
 import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@radix-ui/react-tooltip";
+import { SquareArrowOutUpRight } from "lucide-react";
 
 interface NonMemoizedMarkdownProps {
   children: string;
@@ -15,7 +22,7 @@ interface NonMemoizedMarkdownProps {
 export const NonMemoizedMarkdown: FC<NonMemoizedMarkdownProps> = ({
   children,
 }) => {
-  return (  
+  return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeKatex, rehypeRaw]}
@@ -126,6 +133,28 @@ export const NonMemoizedMarkdown: FC<NonMemoizedMarkdownProps> = ({
             {children}
           </blockquote>
         ),
+        a({ children, href, ...props }) {
+          return (
+            <TooltipProvider>
+              <Tooltip delayDuration={200}>
+                <TooltipTrigger asChild>
+                  <a
+                    href={href} //8x12
+                    className="no-underline font-normal text-black align-super ml-[-3] hover:text-primary text-[8px] sm:text-[11px] md:text-[11px]"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    [{children}]
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="flex items-center gap-2">
+                  <SquareArrowOutUpRight className="h-4 w-4" />
+                  <span>{href?.slice(0, 50) + "..."}</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
       }}
       className="text-sm"
     >

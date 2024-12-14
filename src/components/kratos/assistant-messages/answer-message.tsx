@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { FC, useEffect, useState } from "react";
 import { Markdown } from "../markdown";
@@ -18,7 +18,7 @@ export const AssistantMessage: FC<AssistantMessageProps> = ({ content }) => {
 
   return (
     <div className="bg-red-500">
-      <Markdown>{text}</Markdown>
+      <Markdown>{data || "error!"}</Markdown>
     </div>
   );
 };
