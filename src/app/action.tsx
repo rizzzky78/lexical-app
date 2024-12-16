@@ -11,7 +11,7 @@ import {
 import { submitMessage } from "@/lib/agents/workflow/submit-message";
 import { getServerSession } from "next-auth";
 import { titleCrafter } from "@/lib/agents/workflow/title-crafter";
-import { saveChat } from "@/lib/agents/action/chat-service";
+import { getChat, saveChat } from "@/lib/agents/action/chat-service";
 import { mapUIState } from "@/lib/agents/action/get-ui-state";
 
 const serverInitialAIState: AIState = {
@@ -37,12 +37,19 @@ export const AI = createAI<AIState, UIState, UseAction>({
     if (done) {
       const session = await getServerSession();
       const userId = session?.user?.email || "anonymous";
+      let chatTitle: string = "";
 
-      const chatTitle = await titleCrafter({ context: messages });
+      const currentChatData = await getChat(chatId);
+
+      if (!currentChatData || !currentChatData.title) {
+        chatTitle = await titleCrafter({ context: messages });
+      }
+
+      const lastMessages = messages.filter((m) => m.messageType !== "end");
 
       // Add an 'end' message at the end to determine if the history needs to be reloaded
       const updatedMessages: MessageProperty[] = [
-        ...messages,
+        ...lastMessages,
         {
           id: generateId(),
           role: "assistant",
@@ -66,10 +73,10 @@ export const AI = createAI<AIState, UIState, UseAction>({
   onGetUIState: async () => {
     "use server";
 
-    const aiState = getAIState();
+    const aiState = getAIState<typeof AI>();
 
     if (aiState) {
-      const uiState = mapUIState(aiState as ChatProperties);
+      const uiState = mapUIState(aiState);
       return uiState;
     } else {
       return;

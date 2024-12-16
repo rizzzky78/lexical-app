@@ -53,10 +53,10 @@ export type MessageProperty = {
 export type ActionsType = "sendMessage" | "streamMessage";
 
 export type UseAction = {
-  submitMessage: (
-    payload: SubmitMessagePayload
-  ) => Promise<{ id: string; component: ReactNode }>;
+  submitMessage: (payload: SubmitMessagePayload) => Promise<UIComponent>;
 };
+
+export type UIComponent = { id: string; component: ReactNode };
 
 export type SubmitMessagePayload = {
   /**
@@ -65,7 +65,8 @@ export type SubmitMessagePayload = {
    * - assistant message
    * - tool message or tool result with serializable content JSON value
    */
-  message: CoreMessage;
+  // message: CoreMessage;
+  formData: FormData;
   /**
    * The owner or the user id
    */

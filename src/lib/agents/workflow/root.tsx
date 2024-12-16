@@ -12,6 +12,8 @@ import { groq } from "@ai-sdk/groq";
 import { AssistantMessage } from "@/components/kratos/assistant-messages/answer-message";
 import { xai } from "@ai-sdk/xai";
 
+import fs from "fs";
+
 interface RootAgentPayload {
   model: string;
   messages: CoreMessage[];
@@ -23,14 +25,17 @@ export async function agent({ model, messages, uiStream }: RootAgentPayload) {
   let responseMessages: (CoreAssistantMessage | CoreToolMessage)[] = [];
   let toolResults: Record<string, any>[] = [];
 
-  console.log("from root agent :", JSON.stringify(messages, null, 2));
+  fs.writeFileSync(
+    "./src/debug/state/payload-messages.json",
+    JSON.stringify(messages, null, 2)
+  );
 
   const streamableText = createStreamableValue<string>("");
 
   uiStream.append(<AssistantMessage content={streamableText.value} />);
 
-  const { fullStream, response } = streamText({
-    model: xai('grok-beta'),
+  const { fullStream, textStream } = streamText({
+    model: google("gemini-1.5-pro"),
     messages,
     maxSteps: 10,
     // tools: toolContainer("not-set", { uiStream }),
@@ -44,14 +49,17 @@ export async function agent({ model, messages, uiStream }: RootAgentPayload) {
     onFinish: async (finishedResult) => {
       responseMessages = finishedResult.response.messages;
       streamableText.done(fullResponse);
+      fs.writeFileSync(
+        "./src/debug/state/agent-root-response.json",
+        JSON.stringify(finishedResult, null, 2)
+      );
     },
   });
 
-  for await (const delta of fullStream) {
-    if (delta.type === "text-delta" && delta.textDelta) {
-      fullResponse += delta.textDelta;
-      streamableText.update(delta.textDelta);
-    }
+  for await (const tStream of textStream) {
+    console.log(tStream)
+    streamableText.update(tStream);
+    fullResponse += tStream;
   }
 
   const payload = {

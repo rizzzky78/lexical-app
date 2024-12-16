@@ -1,17 +1,12 @@
 {
-  "message": {
-    "role": "user",
-    "content": [
-      {
-        "type": "text",
-        "text": "Explain concept of quantum entanglement"
-      }
-    ]
-  },
-  "userId": "anonymous",
-  "model": "none",
+  "formData": {},
+  "userId": "not-set",
+  "model": "not-set",
   "messageType": "text_input",
-  "enableRelated": {
-    "scopeRelated": "last-message"
+  "classify": false,
+  "scope": {
+    "inquire": "global",
+    "related": "overall",
+    "taskManager": "global"
   }
 }

@@ -135,11 +135,11 @@ export async function saveChat(userId: string, chat: ChatProperties) {
       messages: JSON.stringify(chat.messages, null, 2),
     };
 
-    pipeline.hmset(`chat:${chat.id}`, chatToSave);
-    pipeline.zadd(`user:chat:${userId}`, Date.now(), `chat:${chat.id}`);
+    pipeline.hmset(`chat:${chat.chatId}`, chatToSave);
+    pipeline.zadd(`user:chat:${userId}`, Date.now(), `chat:${chat.chatId}`);
 
     const results = await pipeline.exec();
-
+    logger.info("User chat saved successfully!");
     return results;
   } catch (error) {
     logger.error("Error when save the chat properties in <saveChat()>");

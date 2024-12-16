@@ -1,44 +1,72 @@
 import { ReactNode } from "react";
 import {
+  AIState,
   AssistantMessageType,
   ChatProperties,
   MessageProperty,
+  UIComponent,
   UIState,
   UserMessageType,
 } from "@/lib/types/ai";
 import { DebugMessage } from "@/components/kratos/debug-message";
+import { FollowupPanel } from "@/components/kratos/assistant-messages/followup-panel";
 
 /**
  * Maps AI state to UI state for rendering components dynamically.
- * @param aiState ChatProperties containing messages and chat details.
+ * @param aiState AIState containing messages and chat details.
  * @returns UIState array with id and component mappings.
  */
-export const mapUIState = (aiState: ChatProperties): UIState => {
+export const mapUIState = (aiState: AIState): UIState => {
   const messages: MessageProperty[] = Array.isArray(aiState.messages)
     ? aiState.messages.map((m) => ({ ...m }))
     : [];
 
-  return messages
+  let lastRelatedPanel: UIComponent | null = null;
+  // Track the last followup-panel message
+  let lastFollowupPanel: UIComponent | null = null;
+
+  // Modified mapping to handle followup-panel
+  const processedMessages = messages
     .map(({ id, role, messageType, content, toolName }) => {
+      //
+      if (role === "assistant" && messageType === "related") {
+        lastRelatedPanel = {
+          id,
+          component: <DebugMessage source={messageType} data={content} />,
+        };
+        return null;
+      }
+      // Handle followup-panel separately
+      if (role === "assistant" && messageType === "followup-panel") {
+        lastFollowupPanel = {
+          id,
+          component: <FollowupPanel />,
+        };
+        return null;
+      }
+
+      // Process other messages normally
       switch (role) {
-        case "user": {
+        case "user":
           return handleUserMessage(id, messageType as UserMessageType, content);
-        }
-        case "assistant": {
+        case "assistant":
           return handleAssistantMessage(
             id,
             messageType as AssistantMessageType,
             content
           );
-        }
-        case "tool": {
+        case "tool":
           return handleToolMessage(id, toolName, content);
-        }
         default:
           return null;
       }
     })
-    .filter((m): m is NonNullable<typeof m> => m !== null); // Filter out null values.
+    .filter((m): m is NonNullable<typeof m> => m !== null);
+
+  // If a followup-panel exists, append it to the end
+  return lastFollowupPanel && lastRelatedPanel
+    ? [...processedMessages, lastRelatedPanel, lastFollowupPanel]
+    : processedMessages;
 };
 
 /**
@@ -124,7 +152,7 @@ const handleAssistantMessage = (
     case "followup-panel":
       return {
         id,
-        component: <DebugMessage source={messageType} data={content} />,
+        component: <FollowupPanel />,
       };
     case "related":
       return {

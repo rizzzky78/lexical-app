@@ -18,7 +18,7 @@ export const AssistantMessage: FC<AssistantMessageProps> = ({ content }) => {
 
   return (
     <div className="bg-red-500">
-      <Markdown>{data || "error!"}</Markdown>
+      <Markdown>{text}</Markdown>
     </div>
   );
 };

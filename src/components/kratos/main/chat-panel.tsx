@@ -1,5 +1,7 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, FormEvent } from "react";
 import { useActions, useAIState, useUIState } from "ai/rsc";
 import { CoreUserMessage, FilePart, generateId, ImagePart } from "ai";
 import { fileTypeFromBuffer } from "file-type";
@@ -8,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { File, Paperclip, Plus, Send, X } from "lucide-react";
 import { AI } from "@/app/action";
 import { useRouter } from "next/navigation";
+import { storageService } from "@/lib/agents/action/storage-service";
+import { UIComponent } from "@/lib/types/ai";
 
 interface FileWithPreview {
   file: File;
@@ -32,106 +36,71 @@ export function ChatPanel({ messages, query, chatid }: ChatPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (input.trim() === "" && files.length === 0) return;
 
-    // Add user message to UI
-    setUIState((currentMessages) => [
-      ...currentMessages,
-      {
-        id: generateId(),
-        component: (
-          <div className="flex flex-col items-end">
-            {input && (
-              <div className="bg-blue-500 text-white p-2 rounded-lg mb-2 max-w-[70%]">
-                {input}
-              </div>
-            )}
-            {files.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {files.map((file) => (
-                  <div key={file.id} className="w-16 h-16 relative">
-                    {file.preview ? (
-                      <img
-                        src={file.preview}
-                        alt={file.file.name}
-                        className="w-full h-full object-cover rounded"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded">
-                        <File className="w-8 h-8 text-gray-500" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ),
-      },
-    ]);
-
-    const payloadContent: (
-      | ImagePart
-      | FilePart
-      | { type: "text"; text: string }
-    )[] = [];
+    const formData = new FormData();
 
     // Add text content if present
     if (input.trim() !== "") {
-      payloadContent.push({
-        type: "text",
-        text: input.trim(),
-      });
+      formData.append("text", input.trim());
     }
 
     // Add file content if present
-    if (files.length > 0) {
-      const fileContents = await Promise.all(
-        files.map(async (file) => {
-          const buffer = await file.file.arrayBuffer();
-          const fileType = await fileTypeFromBuffer(buffer);
-          const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    files.forEach((file, index) => {
+      formData.append(`file-${file.id}`, file.file);
+    });
 
-          if (file.file.type.startsWith("image/")) {
-            return {
-              type: "image",
-              image: base64,
-            } as ImagePart;
-          } else {
-            return {
-              type: "file",
-              data: base64,
-              mimeType: fileType?.mime || file.file.type,
-            } as FilePart;
-          }
-        })
-      );
-
-      payloadContent.push(...fileContents);
-    }
-
-    const payloadMessages: CoreUserMessage = {
-      role: "user",
-      content: payloadContent,
+    const uiComponent: UIComponent = {
+      id: generateId(),
+      component: (
+        <div className="flex flex-col items-end">
+          {input && (
+            <div className="bg-blue-500 text-white p-2 rounded-lg mb-2 max-w-[70%]">
+              {input}
+            </div>
+          )}
+          {files.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {files.map((file) => (
+                <div key={file.id} className="w-16 h-16 relative">
+                  {file.preview ? (
+                    <img
+                      src={file.preview}
+                      alt={file.file.name}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded">
+                      <File className="w-8 h-8 text-gray-500" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ),
     };
 
-    try {
-      const response = await submitMessage({
-        message: payloadMessages,
-        userId: "anonymous", // this must be from *Session* in getServerSession or in client side
-        model: "none",
-        messageType: "text_input",
-        enableRelated: { scopeRelated: "last-message" },
-      });
+    setUIState((currentUI) => [...currentUI, uiComponent]);
 
-      setUIState((current) => [...current, response]);
-    } catch (error) {
-      console.error("Error submitting message:", error);
-      // You might want to show an error message to the user here
-    }
+    const responseUi = await submitMessage({
+      formData,
+      userId: "not-set",
+      model: "not-set",
+      messageType: "text_input",
+      classify: false,
+      scope: {
+        inquire: "global",
+        related: "overall",
+        taskManager: "global",
+      },
+    });
+
+    setUIState((currentUI) => [...currentUI, responseUi]);
 
     setInput("");
     setFiles([]);
@@ -229,6 +198,7 @@ export function ChatPanel({ messages, query, chatid }: ChatPanelProps) {
       )}
       <div className="flex items-end gap-2">
         <Textarea
+          name="text_input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
@@ -237,6 +207,7 @@ export function ChatPanel({ messages, query, chatid }: ChatPanelProps) {
         />
         <input
           type="file"
+          name="attachment"
           ref={fileInputRef}
           onChange={handleFileChange}
           multiple

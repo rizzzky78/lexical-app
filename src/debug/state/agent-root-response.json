@@ -1,0 +1,92 @@
+{
+  "finishReason": "stop",
+  "usage": {
+    "promptTokens": 7,
+    "completionTokens": 229,
+    "totalTokens": 236
+  },
+  "text": "SpaceX's mission is to make humanity multiplanetary.  This overarching goal encompasses several key objectives:\n\n* **Developing reusable rockets and spacecraft:** This is a core element of their strategy to reduce the cost of space travel, making it more accessible for various purposes.\n* **Mars colonization:**  Their ultimate ambition is to establish a self-sustaining city on Mars, serving as a backup for Earth and expanding human civilization beyond our planet.\n* **Improving access to space:**  By lowering launch costs and increasing reliability, SpaceX aims to open up space for more scientific research, commercial ventures, and exploration.\n* **Advancing space technology:**  They continually push the boundaries of rocketry and spacecraft design, developing innovative solutions for propulsion, reusability, and in-space operations.\n* **Providing global internet access:** Through their Starlink constellation of satellites, SpaceX aims to provide high-speed internet access to even the most remote areas of the world.\n\nWhile Mars colonization is the long-term vision, SpaceX's current activities contribute to this goal by generating revenue, refining technology, and gaining experience in space operations.\n",
+  "toolCalls": [],
+  "toolResults": [],
+  "request": {
+    "body": "{\"generationConfig\":{\"temperature\":0},\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"What is spacex mission?\"}]}]}"
+  },
+  "response": {
+    "id": "aitxt-033YsXcBxuqowrQY1gZqZTmD",
+    "timestamp": "2024-12-16T13:13:47.171Z",
+    "modelId": "gemini-1.5-pro",
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "content-disposition": "attachment",
+      "content-type": "text/event-stream",
+      "date": "Mon, 16 Dec 2024 13:13:46 GMT",
+      "server": "scaffolding on HTTPServer2",
+      "server-timing": "gfet4t7; dur=1443",
+      "transfer-encoding": "chunked",
+      "vary": "Origin, X-Origin, Referer",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "0"
+    },
+    "messages": [
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "SpaceX's mission is to make humanity multiplanetary.  This overarching goal encompasses several key objectives:\n\n* **Developing reusable rockets and spacecraft:** This is a core element of their strategy to reduce the cost of space travel, making it more accessible for various purposes.\n* **Mars colonization:**  Their ultimate ambition is to establish a self-sustaining city on Mars, serving as a backup for Earth and expanding human civilization beyond our planet.\n* **Improving access to space:**  By lowering launch costs and increasing reliability, SpaceX aims to open up space for more scientific research, commercial ventures, and exploration.\n* **Advancing space technology:**  They continually push the boundaries of rocketry and spacecraft design, developing innovative solutions for propulsion, reusability, and in-space operations.\n* **Providing global internet access:** Through their Starlink constellation of satellites, SpaceX aims to provide high-speed internet access to even the most remote areas of the world.\n\nWhile Mars colonization is the long-term vision, SpaceX's current activities contribute to this goal by generating revenue, refining technology, and gaining experience in space operations.\n"
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "steps": [
+    {
+      "stepType": "initial",
+      "text": "SpaceX's mission is to make humanity multiplanetary.  This overarching goal encompasses several key objectives:\n\n* **Developing reusable rockets and spacecraft:** This is a core element of their strategy to reduce the cost of space travel, making it more accessible for various purposes.\n* **Mars colonization:**  Their ultimate ambition is to establish a self-sustaining city on Mars, serving as a backup for Earth and expanding human civilization beyond our planet.\n* **Improving access to space:**  By lowering launch costs and increasing reliability, SpaceX aims to open up space for more scientific research, commercial ventures, and exploration.\n* **Advancing space technology:**  They continually push the boundaries of rocketry and spacecraft design, developing innovative solutions for propulsion, reusability, and in-space operations.\n* **Providing global internet access:** Through their Starlink constellation of satellites, SpaceX aims to provide high-speed internet access to even the most remote areas of the world.\n\nWhile Mars colonization is the long-term vision, SpaceX's current activities contribute to this goal by generating revenue, refining technology, and gaining experience in space operations.\n",
+      "toolCalls": [],
+      "toolResults": [],
+      "finishReason": "stop",
+      "usage": {
+        "promptTokens": 7,
+        "completionTokens": 229,
+        "totalTokens": 236
+      },
+      "warnings": [],
+      "request": {
+        "body": "{\"generationConfig\":{\"temperature\":0},\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"What is spacex mission?\"}]}]}"
+      },
+      "response": {
+        "id": "aitxt-033YsXcBxuqowrQY1gZqZTmD",
+        "timestamp": "2024-12-16T13:13:47.171Z",
+        "modelId": "gemini-1.5-pro",
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+          "content-disposition": "attachment",
+          "content-type": "text/event-stream",
+          "date": "Mon, 16 Dec 2024 13:13:46 GMT",
+          "server": "scaffolding on HTTPServer2",
+          "server-timing": "gfet4t7; dur=1443",
+          "transfer-encoding": "chunked",
+          "vary": "Origin, X-Origin, Referer",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "SAMEORIGIN",
+          "x-xss-protection": "0"
+        },
+        "messages": [
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "text",
+                "text": "SpaceX's mission is to make humanity multiplanetary.  This overarching goal encompasses several key objectives:\n\n* **Developing reusable rockets and spacecraft:** This is a core element of their strategy to reduce the cost of space travel, making it more accessible for various purposes.\n* **Mars colonization:**  Their ultimate ambition is to establish a self-sustaining city on Mars, serving as a backup for Earth and expanding human civilization beyond our planet.\n* **Improving access to space:**  By lowering launch costs and increasing reliability, SpaceX aims to open up space for more scientific research, commercial ventures, and exploration.\n* **Advancing space technology:**  They continually push the boundaries of rocketry and spacecraft design, developing innovative solutions for propulsion, reusability, and in-space operations.\n* **Providing global internet access:** Through their Starlink constellation of satellites, SpaceX aims to provide high-speed internet access to even the most remote areas of the world.\n\nWhile Mars colonization is the long-term vision, SpaceX's current activities contribute to this goal by generating revenue, refining technology, and gaining experience in space operations.\n"
+              }
+            ]
+          }
+        ]
+      },
+      "isContinued": false
+    }
+  ]
+}
