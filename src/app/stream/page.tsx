@@ -5,10 +5,10 @@ import { useActions } from "ai/rsc";
 import { motion } from "framer-motion";
 import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { AIMessage } from "@/components/kratos/ai-message";
-import { AIProvider } from "../action";
+import { RootAI } from "../root-action";
 
 export default function Home() {
-  const { sendMessage } = useActions();
+  const { sendMessage } = useActions<typeof RootAI>();
 
   const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<Array<ReactNode>>([]);
@@ -52,7 +52,12 @@ export default function Home() {
             ]);
             setInput("");
 
-            const response: ReactNode = await sendMessage(input);
+            const response: ReactNode = await sendMessage([
+              {
+                role: "user",
+                content: input,
+              },
+            ]);
             setMessages((messages) => [...messages, response]);
           }}
         >

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { Toaster } from "sonner";
-import { AIProvider } from "../action";
+import { RootAI } from "../root-action";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ai-sdk-preview-rsc-genui.vercel.dev"),
@@ -16,7 +16,7 @@ export default function StreamLayout({
   return (
     <div>
       <Toaster position="top-center" richColors />
-      <AIProvider>{children}</AIProvider>
+      <RootAI>{children}</RootAI>
     </div>
   );
 }

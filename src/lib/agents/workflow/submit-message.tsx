@@ -12,7 +12,11 @@ import {
   generateId,
   ImagePart,
 } from "ai";
-import { createStreamableUI, getMutableAIState } from "ai/rsc";
+import {
+  createStreamableUI,
+  createStreamableValue,
+  getMutableAIState,
+} from "ai/rsc";
 import { agent } from "./root";
 import { querySuggestor } from "./query-suggestor";
 import { RelatedQuery } from "../schema/related-query";
@@ -25,6 +29,7 @@ import { NextAction } from "../schema/next-action";
 import { CopilotInquiry } from "@/components/kratos/assistant-messages/inquiry";
 import { storageService } from "../action/storage-service";
 import { fileTypeFromBuffer } from "file-type";
+import { AssistantMessage } from "@/components/kratos/assistant-messages/answer-message";
 
 export async function submitMessage(
   payload: SubmitMessagePayload
@@ -48,8 +53,6 @@ export async function submitMessage(
   const aiState = getMutableAIState<typeof AI>();
 
   const uiStream = createStreamableUI();
-
-  uiStream.append(<div>Loading...</div>);
 
   // parse payload
   const { textEntries, filesEntries } = await storageService.processFormData(
@@ -123,7 +126,6 @@ export async function submitMessage(
   }
 
   // run the workflow
-  uiStream.update(null);
 
   let nextAction: NextAction = { next: "proceed" };
 
@@ -181,6 +183,10 @@ export async function submitMessage(
     };
   }
 
+  const streamableText = createStreamableValue<string>("");
+
+  uiStream.append(<AssistantMessage content={streamableText.value} />);
+
   /**
    * Run the main Agent
    * @main_agent
@@ -189,6 +195,7 @@ export async function submitMessage(
     model,
     messages,
     uiStream,
+    strText: streamableText,
   });
 
   console.log("resulted text :", text);

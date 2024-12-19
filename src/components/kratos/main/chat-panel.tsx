@@ -3,14 +3,12 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useRef, useCallback, FormEvent } from "react";
 import { useActions, useAIState, useUIState } from "ai/rsc";
-import { CoreUserMessage, FilePart, generateId, ImagePart } from "ai";
-import { fileTypeFromBuffer } from "file-type";
+import { generateId } from "ai";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { File, Paperclip, Plus, Send, X } from "lucide-react";
 import { AI } from "@/app/action";
 import { useRouter } from "next/navigation";
-import { storageService } from "@/lib/agents/action/storage-service";
 import { UIComponent } from "@/lib/types/ai";
 
 interface FileWithPreview {
@@ -30,8 +28,8 @@ export function ChatPanel({ messages, query, chatid }: ChatPanelProps) {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const { submitMessage } = useActions<typeof AI>();
 
-  const [_, setUIState] = useUIState<typeof AI>();
-  const [aiState, setAIState] = useAIState<typeof AI>();
+  const [, setUIState] = useUIState<typeof AI>();
+  const [, setAIState] = useAIState<typeof AI>();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();

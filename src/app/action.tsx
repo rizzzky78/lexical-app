@@ -1,5 +1,4 @@
-import { CoreUserMessage, generateId, TextPart } from "ai";
-
+import { generateId } from "ai";
 import { createAI, getAIState } from "ai/rsc";
 import {
   AIState,

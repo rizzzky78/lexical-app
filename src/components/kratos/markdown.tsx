@@ -45,7 +45,9 @@ export const NonMemoizedMarkdown: FC<NonMemoizedMarkdownProps> = ({
         h6: ({ children }) => (
           <h6 className="text-xs font-semibold mb-2">{children}</h6>
         ),
-        p: ({ children }) => <p className="text-sm mb-2">{children}</p>,
+        p: ({ children }) => (
+          <p className="text-sm mb-2 leading-relaxed">{children}</p>
+        ),
         ul: ({ children }) => (
           <ul className="text-sm list-disc list-inside mb-2">{children}</ul>
         ),
@@ -140,14 +142,14 @@ export const NonMemoizedMarkdown: FC<NonMemoizedMarkdownProps> = ({
                 <TooltipTrigger asChild>
                   <a
                     href={href} //8x12
-                    className="no-underline font-normal text-black align-super ml-[-3] hover:text-primary text-[8px] sm:text-[11px] md:text-[11px]"
+                    className="no-underline text-white font-normal ml-[-3] hover:text-primary text-[8px] sm:text-[11px] md:text-[11px]"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    [{children}]
+                    [{new URL(href || "example.com").hostname}]
                   </a>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="flex items-center gap-2">
+                <TooltipContent side="top" className="flex items-center gap-2 bg-black p-1">
                   <SquareArrowOutUpRight className="h-4 w-4" />
                   <span>{href?.slice(0, 50) + "..."}</span>
                 </TooltipContent>

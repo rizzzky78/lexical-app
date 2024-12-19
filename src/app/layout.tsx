@@ -3,6 +3,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Noto_Serif } from "next/font/google";
 import { ThemeProvider } from "@/components/provider/theme-provider";
+import { Header } from "@/components/kratos/essentials/header";
 
 const notoSerif = Noto_Serif({
   weight: "300",
@@ -39,7 +40,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* <Header /> */}
+          <Header />
           {children}
         </ThemeProvider>
       </body>
