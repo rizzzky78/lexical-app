@@ -12,18 +12,28 @@ export interface SearchPageProps {
   };
 }
 
-export async function generateMetadata({ params }: SearchPageProps) {
-  const chat = await getChat(params.id);
+export async function generateMetadata(props: {
+  params: Promise<{ id: string }>;
+}) {
+  const params = await props.params;
+  const { id } = params;
+
+  const chat = await getChat(id);
   return {
     title: chat?.title.toString().slice(0, 50) || "Search",
   };
 }
 
-export default async function SearchPage({ params }: SearchPageProps) {
+export default async function SearchPage(props: {
+  params: Promise<{ id: string }>;
+}) {
+  const params = await props.params;
+  const { id } = params;
+
   const session = await getServerSession();
 
   const userId = session?.user?.email as string;
-  const chat = await getChat(params.id);
+  const chat = await getChat(id);
 
   if (!chat) {
     redirect("/rsc");
@@ -40,7 +50,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
         messages: chat.messages,
       }}
     >
-      <Chat id={params.id} />
+      <Chat id={id} />
     </AI>
   );
 }

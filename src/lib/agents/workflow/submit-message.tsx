@@ -1,25 +1,15 @@
+"use server";
+
 import { AI } from "@/app/action";
 import {
   MessageProperty,
   UIComponent,
   SubmitMessagePayload,
-  UserMessageType,
 } from "@/lib/types/ai";
-import {
-  CoreMessage,
-  CoreUserMessage,
-  FilePart,
-  generateId,
-  ImagePart,
-} from "ai";
-import {
-  createStreamableUI,
-  createStreamableValue,
-  getMutableAIState,
-} from "ai/rsc";
+import { CoreMessage, generateId } from "ai";
+import { createStreamableUI, getMutableAIState } from "ai/rsc";
 import { agent } from "./root";
 import { querySuggestor } from "./query-suggestor";
-import { RelatedQuery } from "../schema/related-query";
 
 import fs from "fs";
 import { FollowupPanel } from "@/components/kratos/assistant-messages/followup-panel";
@@ -27,15 +17,11 @@ import { inquire } from "./inquiry-generator";
 import { taskManager } from "./task-manager";
 import { NextAction } from "../schema/next-action";
 import { CopilotInquiry } from "@/components/kratos/assistant-messages/inquiry";
-import { storageService } from "../action/storage-service";
-import { fileTypeFromBuffer } from "file-type";
-import { AssistantMessage } from "@/components/kratos/assistant-messages/answer-message";
+import { queryExtractor } from "./query-extractor";
 
 export async function submitMessage(
   payload: SubmitMessagePayload
 ): Promise<UIComponent> {
-  "use server";
-
   fs.writeFileSync(
     "./src/debug/state/submit-message-payoad.json",
     JSON.stringify(payload, null, 2)
@@ -54,42 +40,7 @@ export async function submitMessage(
 
   const uiStream = createStreamableUI();
 
-  // parse payload
-  const { textEntries, filesEntries } = await storageService.processFormData(
-    formData
-  );
-  const payloadContent: CoreUserMessage["content"] = [];
-
-  if (textEntries.length > 0) {
-    payloadContent.push({ type: "text", text: textEntries[0].value });
-  }
-
-  if (filesEntries.length > 0) {
-    // Map to create an array of file processing promises
-    const fileProcessingPromises = filesEntries.map(async (v) => {
-      const fileType = await fileTypeFromBuffer(v.buffer);
-      const isImage = fileType?.mime.startsWith("image/");
-
-      if (isImage) {
-        return {
-          type: "image",
-          image: v.base64,
-          mimeType: fileType?.mime,
-        } as ImagePart;
-      } else {
-        return {
-          type: "file",
-          data: v.base64,
-          mimeType: fileType?.mime,
-        } as FilePart;
-      }
-    });
-
-    // Wait for all file processing to complete
-    const processedFiles = await Promise.all(fileProcessingPromises);
-
-    payloadContent.push(...processedFiles);
-  }
+  const { payloadContent } = await queryExtractor(formData);
 
   const aiMessages = [...aiState.get().messages];
 
@@ -105,25 +56,23 @@ export async function submitMessage(
       return { role, content } as CoreMessage;
     });
 
-  if (payloadContent.length > 0) {
-    aiState.update({
-      ...aiState.get(),
-      messages: [
-        ...aiState.get().messages,
-        {
-          id: generateId(),
-          role: "user",
-          content: payloadContent,
-          messageType,
-        },
-      ],
-    });
+  aiState.update({
+    ...aiState.get(),
+    messages: [
+      ...aiState.get().messages,
+      {
+        id: generateId(),
+        role: "user",
+        content: payloadContent,
+        messageType,
+      },
+    ],
+  });
 
-    messages.push({
-      role: "user",
-      content: payloadContent,
-    });
-  }
+  messages.push({
+    role: "user",
+    content: payloadContent,
+  });
 
   // run the workflow
 
@@ -183,10 +132,6 @@ export async function submitMessage(
     };
   }
 
-  const streamableText = createStreamableValue<string>("");
-
-  uiStream.append(<AssistantMessage content={streamableText.value} />);
-
   /**
    * Run the main Agent
    * @main_agent
@@ -195,10 +140,7 @@ export async function submitMessage(
     model,
     messages,
     uiStream,
-    strText: streamableText,
   });
-
-  console.log("resulted text :", text);
 
   const filteredMessages = responseMessages.map((v) => {
     return {

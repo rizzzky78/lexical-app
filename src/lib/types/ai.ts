@@ -54,6 +54,7 @@ export type ActionsType = "sendMessage" | "streamMessage";
 
 export type UseAction = {
   submitMessage: (payload: SubmitMessagePayload) => Promise<UIComponent>;
+  sendMessage?: (payload: SubmitMessagePayload) => Promise<UIComponent>
 };
 
 export type UIComponent = { id: string; component: ReactNode };

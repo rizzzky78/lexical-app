@@ -68,7 +68,7 @@ class Logger {
    * @param metadata - Optional additional context or metadata.
    */
   error(message: string, metadata?: any): void {
-    this.logger.error(message, metadata);
+    this.logger.error(this.construct(message, [metadata]));
   }
 
   /**
@@ -77,7 +77,7 @@ class Logger {
    * @param metadata - Optional additional context or metadata.
    */
   warn(message: string, metadata?: any): void {
-    this.logger.warn(message, metadata);
+    this.logger.warn(this.construct(message, [metadata]));
   }
 
   /**
@@ -86,7 +86,7 @@ class Logger {
    * @param metadata - Optional additional context or metadata.
    */
   info(message: string, metadata?: any): void {
-    this.logger.info(message, metadata);
+    this.logger.info(this.construct(message, [metadata]));
   }
 
   /**
@@ -117,6 +117,10 @@ class Logger {
    */
   child(meta: Record<string, any>): WinstonLogger {
     return this.logger.child(meta);
+  }
+
+  private construct(ctx: string, meta: unknown[]) {
+    return JSON.stringify({ ctx, meta }, null, 2);
   }
 }
 

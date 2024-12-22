@@ -1,258 +1,254 @@
+"use server";
+
+import {
+  ScrapeRequest,
+  scrapeInputSchema,
+  FireCrawlResponse,
+  FirecrawlAction,
+  CrawlRequest,
+  crawlUrlInputSchema,
+  MapRequest,
+  mapUrlInputSchema,
+  RequestProperties,
+  FirecrawlConfig,
+  ErrorResponse,
+} from "@/lib/types/firecrawl";
+import logger from "@/lib/utility/logger/root";
 import FirecrawlApp from "@mendable/firecrawl-js";
 import { z } from "zod";
-import logger from "@/lib/utility/logger/root"; // Assume a logger utility exists
-import { firecrawlInputSchema } from "@/lib/agents/tools/schema/firecrawl";
-import { getEnv } from "@/lib/utils";
-import {
-  FireCrawlOptions,
-  RequestProperties,
-  FirecrawlAction,
-  ScrapeOptions,
-  CrawlOptions,
-  MapOptions,
-} from "@/lib/types/firecrawl";
 
-// Custom error for Firecrawl-specific errors
-class FirecrawlError extends Error {
-  constructor(message: string, public metadata?: Record<string, any>) {
-    super(message);
-    this.name = "FirecrawlError";
+const DEFAULT_CONFIG: FirecrawlConfig = {
+  defaultWaitTime: 2000,
+  maxRetries: 3,
+  retryDelay: 1000,
+};
+
+/**
+ * Initializes the Firecrawl app with the API key from environment variables.
+ * Throws an error if the API key is not found.
+ * @returns  Instance of FirecrawlApp.
+ */
+function initializeFirecrawl() {
+  const apiKey = process.env.FIRECRAWL_API_KEY;
+  if (!apiKey) {
+    throw new Error("Firecrawl API key is required");
   }
+  return new FirecrawlApp({ apiKey });
 }
 
 /**
- * Firecrawl Client for web scraping, crawling, and mapping
- * Provides a robust interface for different web content extraction methods
+ * Executes an asynchronous operation with retry logic.
+ * @template T
+ * @param {() => Promise<T>} operation - The asynchronous operation to execute.
+ * @param {string} actionType - A label for the action being executed.
+ * @param {Record<string, any>} context - Additional context for logging purposes.
+ * @param {FirecrawlConfig} [config=DEFAULT_CONFIG] - Configuration for retries.
+ * @returns {Promise<T>} The result of the operation or an error response after retries.
  */
-export class FireCrawlClient {
-  /**
-   * Internal Firecrawl application instance
-   * @private
-   */
-  private readonly app: FirecrawlApp;
-
-  /**
-   * Configuration options for Firecrawl client
-   * @private
-   */
-  private readonly config: {
-    defaultWaitTime: number;
-    maxRetries: number;
-    retryDelay: number;
-  };
-
-  /**
-   * Initialize Firecrawl client with API key and optional configuration
-   * @param params - Initialization parameters
-   * @param params.apiKey - Firecrawl API key
-   */
-  constructor(options?: FireCrawlOptions) {
-    const apiKey = options?.apiKey ?? getEnv("FIRECRAWL_API_KEY");
-    // Validate API key
-    if (!apiKey) {
-      throw new FirecrawlError("Firecrawl API key is required");
-    }
-
-    this.app = new FirecrawlApp({ apiKey });
-
-    // Default configuration with optional overrides
-    this.config = {
-      defaultWaitTime: 2000,
-      maxRetries: 3,
-      retryDelay: 1000,
-      ...options?.config,
-    };
-  }
-
-  /**
-   * Execute a Firecrawl request with comprehensive validation and error handling
-   * @param input - Request input with action and options
-   * @returns Processed response based on action type
-   */
-  async handleRequest(input: RequestProperties) {
+async function executeWithRetry<T>(
+  operation: () => Promise<T>,
+  actionType: string,
+  context: Record<string, any>,
+  config: FirecrawlConfig = DEFAULT_CONFIG
+): Promise<T> {
+  for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
     try {
-      // Validate input against schema
-      const validatedInput = firecrawlInputSchema.parse(input);
-
-      // Log request details for traceability
-      logger.info("Firecrawl request initiated", {
-        action: validatedInput.action,
-        url: validatedInput[`${validatedInput.action}Options`]?.url,
-      });
-
-      // Delegate to specific handler based on action
-      const result = await this.handleResponse(validatedInput);
-
+      const result = await operation();
+      if (!result) {
+        throw new Error(`${actionType} returned no data`);
+      }
       return result;
     } catch (error) {
-      this.handleError(error, input);
+      if (attempt === config.maxRetries) {
+        const errorResponse: ErrorResponse = {
+          success: false,
+          error: actionType,
+          message:
+            error instanceof Error ? error.message : "Unknown error occurred",
+        };
+        return errorResponse as T;
+      }
+
+      logger.warn(`${actionType} attempt ${attempt} failed`, {
+        ...context,
+        error: error instanceof Error ? error.message : error,
+        nextAttemptIn: config.retryDelay * attempt,
+      });
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, config.retryDelay * attempt)
+      );
     }
   }
 
-  /**
-   * Route request to appropriate handler based on action type
-   * @param prop - Validated request properties
-   * @private
-   */
-  private async handleResponse(prop: RequestProperties) {
-    switch (prop.action) {
-      case FirecrawlAction.Scrape:
-        return await this.handleScrape(prop.scrapeOptions!);
-      case FirecrawlAction.Crawl:
-        return await this.handleCrawl(prop.crawlOptions!);
-      case FirecrawlAction.Map:
-        return await this.handleMap(prop.mapOptions!);
-      default:
-        throw new FirecrawlError("Invalid action type", {
-          action: prop.action,
-        });
-    }
-  }
+  const errorResponse: ErrorResponse = {
+    success: false,
+    error: actionType,
+    message: "Operation failed after max retries",
+  };
+  return errorResponse as T;
+}
 
-  /**
-   * Handle URL scraping with advanced options and retry mechanism
-   * @param options - Scraping configuration options
-   * @private
-   */
-  private async handleScrape(options: ScrapeOptions) {
+/**
+ * Scrapes a URL using the provided payload and configuration.
+ * @param {ScrapeRequest} payload - The payload containing scrape parameters.
+ * @param {Partial<FirecrawlConfig>} [config={}] - Optional configuration overrides.
+ * @returns The response of the scrape operation.
+ */
+export async function scrapeUrl(
+  payload: ScrapeRequest,
+  config: Partial<FirecrawlConfig> = {}
+) {
+  try {
+    const validatedPayload = scrapeInputSchema.parse(payload);
+    const mergedConfig = { ...DEFAULT_CONFIG, ...config };
+    const app = initializeFirecrawl();
+
     const scrapeOptions = {
-      waitFor: options.waitFor ?? this.config.defaultWaitTime,
-      formats: options.formats,
-      extract: options.formats.includes("extract")
+      waitFor: validatedPayload.waitFor ?? mergedConfig.defaultWaitTime,
+      formats: validatedPayload.formats,
+      extract: validatedPayload.formats.includes("extract")
         ? {
-            systemPrompt: options.systemPrompt,
-            prompt: options.prompt,
+            systemPrompt: validatedPayload.systemPrompt,
+            prompt: validatedPayload.prompt,
           }
         : undefined,
     };
 
-    return this.executeWithRetry(
-      () => this.app.scrapeUrl(options.url, scrapeOptions),
+    const response = await executeWithRetry(
+      () => app.scrapeUrl(validatedPayload.url, scrapeOptions),
       "Scrape",
-      { url: options.url }
+      { url: validatedPayload.url },
+      mergedConfig
     );
-  }
 
-  /**
-   * Handle website crawling with comprehensive options
-   * @param options - Crawling configuration options
-   * @private
-   */
-  private async handleCrawl(options: CrawlOptions) {
-    const crawlOptions = {
-      maxDepth: options.maxDepth ?? 1,
-      limit: options.limit ?? 10,
-      allowBackwardLinks: options.allowBackwardLinks ?? false,
-      allowExternalLinks: options.allowExternalLinks ?? false,
-      ignoreSitemap: options.ignoreSitemap ?? false,
-      scrapeOptions: {
-        waitFor: options.waitFor ?? this.config.defaultWaitTime,
-        formats: options.formats,
-      },
-    };
-
-    return this.executeWithRetry(
-      () => this.app.crawlUrl(options.url, crawlOptions),
-      "Crawl",
-      { url: options.url }
-    );
-  }
-
-  /**
-   * Handle URL mapping with configurable limits
-   * @param options - Mapping configuration options
-   * @private
-   */
-  private async handleMap(options: MapOptions) {
-    const mapOptions = {
-      limit: options.limit ?? 10,
-    };
-
-    return this.executeWithRetry(
-      () => this.app.mapUrl(options.url, mapOptions),
-      "Map",
-      { url: options.url }
-    );
-  }
-
-  /**
-   * Generic retry mechanism for Firecrawl operations
-   * @param operation - Function to execute
-   * @param actionType - Type of Firecrawl action
-   * @param context - Additional context for logging
-   * @private
-   */
-  private async executeWithRetry<T>(
-    operation: () => Promise<T>,
-    actionType: string,
-    context: Record<string, any>
-  ): Promise<T> {
-    for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
-      try {
-        const result = await operation();
-
-        if (!result) {
-          throw new FirecrawlError(`${actionType} returned no data`, context);
-        }
-
-        return result;
-      } catch (error) {
-        if (attempt === this.config.maxRetries) {
-          throw error;
-        }
-
-        logger.warn(`${actionType} attempt ${attempt} failed`, {
-          ...context,
-          error: error instanceof Error ? error.message : error,
-          nextAttemptIn: this.config.retryDelay,
-        });
-
-        // Exponential backoff
-        await new Promise((resolve) =>
-          setTimeout(resolve, this.config.retryDelay * attempt)
-        );
-      }
+    if (!response.success) {
+      throw new Error("Scrape operation failed");
     }
 
-    throw new FirecrawlError(`${actionType} failed after max retries`, context);
-  }
-
-  /**
-   * Centralized error handling for Firecrawl operations
-   * @param error - Caught error
-   * @param input - Original request input
-   * @private
-   */
-  private handleError(error: unknown, input: RequestProperties): never {
-    if (error instanceof z.ZodError) {
-      logger.error("Input validation failed", {
-        errors: error.errors,
-        input,
-      });
-      throw new FirecrawlError("Invalid input", {
-        validationErrors: error.errors,
-      });
-    }
-
-    if (error instanceof FirecrawlError) {
-      logger.error("Firecrawl operation error", {
-        message: error.message,
-        metadata: error.metadata,
-      });
-      throw error;
-    }
-
-    logger.error("Unexpected Firecrawl error", {
-      error: error instanceof Error ? error.message : error,
-      input,
-    });
-
-    throw new FirecrawlError("Unexpected error during Firecrawl operation", {
-      originalError: error,
+    return response as FireCrawlResponse<FirecrawlAction.Scrape>;
+  } catch (error) {
+    return handleError(error, {
+      action: FirecrawlAction.Scrape,
+      properties: payload,
     });
   }
 }
 
-export const fireCrawlClient = new FireCrawlClient();
+/**
+ * Crawls a URL using the provided payload and configuration.
+ * @param {CrawlRequest} payload - The payload containing crawl parameters.
+ * @param {Partial<FirecrawlConfig>} [config={}] - Optional configuration overrides.
+ * @returns The response of the crawl operation.
+ */
+export async function crawlUrl(
+  payload: CrawlRequest,
+  config: Partial<FirecrawlConfig> = {}
+) {
+  try {
+    const validatedPayload = crawlUrlInputSchema.parse(payload);
+    const mergedConfig = { ...DEFAULT_CONFIG, ...config };
+    const app = initializeFirecrawl();
 
-export default FireCrawlClient;
+    const crawlOptions = {
+      maxDepth: validatedPayload.maxDepth ?? 1,
+      limit: validatedPayload.limit ?? 10,
+      allowBackwardLinks: validatedPayload.allowBackwardLinks ?? false,
+      allowExternalLinks: validatedPayload.allowExternalLinks ?? false,
+      ignoreSitemap: validatedPayload.ignoreSitemap ?? false,
+      scrapeOptions: {
+        waitFor: validatedPayload.waitFor ?? mergedConfig.defaultWaitTime,
+        formats: validatedPayload.formats,
+      },
+    };
+
+    const response = await executeWithRetry(
+      () => app.crawlUrl(validatedPayload.url, crawlOptions),
+      "Crawl",
+      { url: validatedPayload.url },
+      mergedConfig
+    );
+
+    if (!response.success) {
+      throw new Error("Crawl operation failed");
+    }
+
+    return response as FireCrawlResponse<FirecrawlAction.Crawl>;
+  } catch (error) {
+    return handleError(error, {
+      action: FirecrawlAction.Crawl,
+      properties: payload,
+    });
+  }
+}
+
+/**
+ * Maps a URL using the provided payload and configuration.
+ * @param {MapRequest} payload - The payload containing map parameters.
+ * @param {Partial<FirecrawlConfig>} [config={}] - Optional configuration overrides.
+ * @returns The response of the map operation.
+ */
+export async function mapUrl(
+  payload: MapRequest,
+  config: Partial<FirecrawlConfig> = {}
+) {
+  try {
+    const validatedPayload = mapUrlInputSchema.parse(payload);
+    const mergedConfig = { ...DEFAULT_CONFIG, ...config };
+    const app = initializeFirecrawl();
+
+    const mapOptions = {
+      limit: validatedPayload.limit ?? 10,
+    };
+
+    const response = await executeWithRetry(
+      () => app.mapUrl(validatedPayload.url, mapOptions),
+      "Map",
+      { url: validatedPayload.url },
+      mergedConfig
+    );
+
+    if (!response.success) {
+      throw new Error("Map operation failed");
+    }
+
+    return response as FireCrawlResponse<FirecrawlAction.Map>;
+  } catch (error) {
+    return handleError(error, {
+      action: FirecrawlAction.Map,
+      properties: payload,
+    });
+  }
+}
+
+/**
+ * Handles errors during operations, logging the error and returning a standardized response.
+ * @param {unknown} error - The error encountered.
+ * @param {RequestProperties} input - The input that caused the error.
+ * @returns {ErrorResponse} A standardized error response.
+ */
+function handleError(error: unknown, input: RequestProperties): ErrorResponse {
+  if (error instanceof z.ZodError) {
+    logger.error("Input validation failed", {
+      errors: error.errors,
+      input,
+    });
+
+    return {
+      success: false,
+      error: "ValidationError",
+      message: JSON.stringify(error.errors),
+    };
+  }
+
+  logger.error("Firecrawl operation error", {
+    error: error instanceof Error ? error.message : error,
+    input,
+  });
+
+  return {
+    success: false,
+    error: "OperationError",
+    message: error instanceof Error ? error.message : "Unknown error occurred",
+  };
+}

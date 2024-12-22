@@ -3,6 +3,8 @@ import { v4 } from "uuid";
 import { AI } from "@/app/action";
 import { Chat } from "@/components/kratos/main/chat";
 
+export const maxDuration = 60;
+
 const ChatPage: FC = () => {
   const id = v4();
 

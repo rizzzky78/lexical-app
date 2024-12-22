@@ -23,7 +23,7 @@ export function Chat({ id, query }: ChatProps) {
   }, [id, path, query, messages]);
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto pt-20 px-4">
       <ChatMessages messages={messages} />
       <ChatPanel messages={messages} query={query} chatid={id} />
     </div>

@@ -3,7 +3,8 @@ import {
   CoreAssistantMessage,
   CoreMessage,
   CoreToolMessage,
-  streamText, Message
+  streamText,
+  Message,
 } from "ai";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import { toolContainer } from "../tools/root";
@@ -18,10 +19,9 @@ interface RootAgentPayload {
   model: string;
   messages: CoreMessage[];
   uiStream: ReturnType<typeof createStreamableUI>;
-  strText: ReturnType<typeof createStreamableValue<string>>
 }
 
-export async function agent({ model, messages, uiStream, strText }: RootAgentPayload) {
+export async function agent({ model, messages, uiStream }: RootAgentPayload) {
   let fullResponse: string = "";
   let responseMessages: (CoreAssistantMessage | CoreToolMessage)[] = [];
   let toolResults: Record<string, any>[] = [];
@@ -31,25 +31,26 @@ export async function agent({ model, messages, uiStream, strText }: RootAgentPay
     JSON.stringify(messages, null, 2)
   );
 
-  // const streamableText = createStreamableValue<string>("");
-
-  // uiStream.append(<AssistantMessage content={streamableText.value} />);
+  const streamableText = createStreamableValue<string>();
 
   const { fullStream, textStream } = streamText({
     model: google("gemini-1.5-pro"),
     messages,
     maxSteps: 10,
     // tools: toolContainer("not-set", { uiStream }),
-    onStepFinish: async (e) => {
-      if (e.stepType === "initial") {
-        if (e.toolCalls && e.toolCalls.length > 0) {
-          toolResults = e.toolCalls;
+    onStepFinish: async (event) => {
+      if (event.stepType === "initial") {
+        if (event.toolCalls && event.toolCalls.length > 0) {
+          uiStream.append(<AssistantMessage content={streamableText.value} />);
+          toolResults = event.toolResults;
+        } else {
+          uiStream.update(<AssistantMessage content={streamableText.value} />);
         }
       }
     },
     onFinish: async (finishedResult) => {
       responseMessages = finishedResult.response.messages;
-      // streamableText.done(fullResponse);
+
       fs.writeFileSync(
         "./src/debug/state/agent-root-response.json",
         JSON.stringify(finishedResult, null, 2)
@@ -57,15 +58,14 @@ export async function agent({ model, messages, uiStream, strText }: RootAgentPay
     },
   });
 
-  for await (const tStream of textStream) {
-    console.log(tStream)
-    // streamableText.update(tStream);
-    strText.update(tStream)
-    fullResponse += tStream;
+  for await (const delta of fullStream) {
+    if (delta.type === "text-delta" && delta.textDelta) {
+      fullResponse += delta.textDelta;
+      streamableText.update(fullResponse);
+    }
   }
 
-  strText.done()
-  // streamableText.done()
+  streamableText.done(fullResponse);
 
   const payload = {
     model,
