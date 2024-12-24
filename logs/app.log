@@ -40,3 +40,23 @@
 [90m[2024-12-21 00:35:19.593][39m [[1m[34mINFO[39m[22m] User chat saved successfully!
 [90m[2024-12-21 00:39:43.486][39m [[1m[34mINFO[39m[22m] User chat saved successfully!
 [90m[2024-12-21 12:09:44.856][39m [[1m[34mINFO[39m[22m] User chat saved successfully!
+[90m[2024-12-22 17:38:23.987][39m [[1m[33mWARN[39m[22m] {
+  "ctx": "Scrape attempt 1 failed",
+  "meta": [
+    {
+      "url": "https://www.tokopedia.com/search?q=Intel+Arc",
+      "error": "Failed to scrape URL. Status code: 408. Error: Request timed out",
+      "nextAttemptIn": 1000
+    }
+  ]
+}
+[90m[2024-12-22 19:06:33.436][39m [[1m[33mWARN[39m[22m] {
+  "ctx": "Scrape attempt 1 failed",
+  "meta": [
+    {
+      "url": "https://www.tokopedia.com/search?q=intel+arc",
+      "error": "Failed to scrape URL. Status code: 500. Error: (Internal server error) - timeout",
+      "nextAttemptIn": 1000
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import React, { FC, memo } from "react";
+import React, { FC, memo, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -6,159 +6,210 @@ import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Copy, Check, SquareArrowOutUpRight } from "lucide-react";
 import "katex/dist/katex.min.css";
 import {
   TooltipProvider,
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@radix-ui/react-tooltip";
-import { SquareArrowOutUpRight } from "lucide-react";
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-interface NonMemoizedMarkdownProps {
+interface MarkdownProps {
   children: string;
+  className?: string;
 }
 
-export const NonMemoizedMarkdown: FC<NonMemoizedMarkdownProps> = ({
-  children,
-}) => {
+interface CodeBlockProps {
+  language: string;
+  value: string;
+  className?: string;
+}
+
+const CodeBlock: FC<CodeBlockProps> = ({ language, value, className }) => {
+  const [isCopied, setIsCopied] = React.useState(false);
+
+  const copyToClipboard = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
+    }
+  }, [value]);
+
+  return (
+    <div className={cn("relative group rounded-lg overflow-hidden", className)}>
+      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={copyToClipboard}
+          className="h-8 w-8 p-0"
+        >
+          {isCopied ? (
+            <Check className="h-4 w-4 text-green-500" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+      <SyntaxHighlighter
+        style={vscDarkPlus}
+        language={language}
+        PreTag="div"
+        showLineNumbers
+        customStyle={{
+          margin: 0,
+          width: "100%",
+          background: "rgb(30, 30, 30)",
+          padding: "1.5rem 1rem",
+          borderRadius: "0.5rem",
+        }}
+        lineNumberStyle={{
+          userSelect: "none",
+          color: "rgb(100, 100, 100)",
+        }}
+        codeTagProps={{
+          style: {
+            fontSize: "0.875rem",
+            fontFamily: "var(--font-mono)",
+            lineHeight: "1.7",
+          },
+        }}
+      >
+        {value}
+      </SyntaxHighlighter>
+    </div>
+  );
+};
+
+const InlineCode: FC<{ children: React.ReactNode }> = ({ children }) => (
+  <code className="px-1.5 py-0.5 rounded-md bg-gray-800 font-mono text-sm">
+    {children}
+  </code>
+);
+
+export const PureMarkdown: FC<MarkdownProps> = ({ children, className }) => {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeKatex, rehypeRaw]}
       components={{
         h1: ({ children }) => (
-          <h1 className="text-xl font-bold mb-2">{children}</h1>
+          <h1 className="scroll-m-20 text-sm font-bold tracking-tight mb-4">
+            {children}
+          </h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-lg font-semibold mb-2">{children}</h2>
+          <h2 className="scroll-m-20 text-sm font-semibold tracking-tight mb-3">
+            {children}
+          </h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-base font-semibold mb-2">{children}</h3>
+          <h3 className="scroll-m-20 text-sm font-semibold tracking-tight mb-2">
+            {children}
+          </h3>
         ),
         h4: ({ children }) => (
-          <h4 className="text-sm font-semibold mb-2">{children}</h4>
-        ),
-        h5: ({ children }) => (
-          <h5 className="text-xs font-semibold mb-2">{children}</h5>
-        ),
-        h6: ({ children }) => (
-          <h6 className="text-xs font-semibold mb-2">{children}</h6>
+          <h4 className="scroll-m-20 text-sm font-semibold tracking-tight mb-2">
+            {children}
+          </h4>
         ),
         p: ({ children }) => (
-          <p className="text-sm mb-2 leading-relaxed">{children}</p>
+          <p className="text-sm leading-7 [&:not(:first-child)]:mt-4">{children}</p>
         ),
         ul: ({ children }) => (
-          <ul className="text-sm list-disc list-inside mb-2">{children}</ul>
+          <ul className="my-4 ml-6 list-disc [&>li]:mt-2">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="text-sm list-decimal list-inside mb-2">{children}</ol>
+          <ol className="my-4 ml-6 list-decimal [&>li]:mt-2">{children}</ol>
         ),
-        li: ({ children }) => <li className="mb-1">{children}</li>,
+        li: ({ children }) => <li className="text-sm leading-7">{children}</li>,
         code({ className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
           const language = match ? match[1] : "";
           const isInline = !match;
+
           return isInline ? (
-            <code className={`${className} text-xs`} {...props}>
-              {children}
-            </code>
+            <InlineCode>{children}</InlineCode>
           ) : (
-            <SyntaxHighlighter
-              style={vscDarkPlus}
+            <CodeBlock
               language={language}
-              PreTag="div"
-              showLineNumbers
-              customStyle={{
-                margin: 0,
-                width: "100%",
-                background: "transparent",
-                padding: "1.5rem 1rem",
-              }}
-              lineNumberStyle={{
-                userSelect: "none",
-              }}
-              codeTagProps={{
-                style: {
-                  fontSize: "0.9rem",
-                  fontFamily: "var(--font-mono)",
-                },
-              }}
-            >
-              {String(children).replace(/\n$/, "")}
-            </SyntaxHighlighter>
+              value={String(children).replace(/\n$/, "")}
+              className="my-6"
+            />
           );
         },
-        table({ children, ...props }) {
+        table({ children }) {
           return (
-            <table className="border-collapse w-full my-4" {...props}>
-              {children}
-            </table>
+            <div className="my-6 w-full overflow-y-auto">
+              <table className="w-full border-collapse border border-gray-700">
+                {children}
+              </table>
+            </div>
           );
         },
-        thead({ children, ...props }) {
-          return (
-            <thead className="dark:text-white" {...props}>
-              {children}
-            </thead>
-          );
+        thead({ children }) {
+          return <thead className="bg-gray-800">{children}</thead>;
         },
-        tr({ children, ...props }) {
-          return (
-            <tr className="border-b" {...props}>
-              {children}
-            </tr>
-          );
+        tr({ children }) {
+          return <tr className="border-b border-gray-700">{children}</tr>;
         },
-        th({ children, ...props }) {
+        th({ children }) {
           return (
-            <th
-              className="border dark:border-white border-black px-4 py-2 text-left"
-              {...props}
-            >
+            <th className="border border-gray-700 px-4 py-2 text-left font-semibold">
               {children}
             </th>
           );
         },
-        td({ children, ...props }) {
+        td({ children }) {
           return (
-            <td
-              className="border dark:border-white border-black px-4 py-2"
-              {...props}
-            >
-              {children}
-            </td>
+            <td className="border border-gray-700 px-4 py-2">{children}</td>
           );
         },
         blockquote: ({ children }) => (
-          <blockquote className="text-sm border-l-4 border-gray-200 pl-4 py-2 mb-2">
+          <blockquote className="mt-4 border-l-4 border-gray-700 pl-4 italic">
             {children}
           </blockquote>
         ),
-        a({ children, href, ...props }) {
+        a({ children, href }) {
+          if (!href) return <>{children}</>;
+
           return (
             <TooltipProvider>
-              <Tooltip delayDuration={200}>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <a
-                    href={href} //8x12
-                    className="no-underline text-white font-normal ml-[-3] hover:text-primary text-[8px] sm:text-[11px] md:text-[11px]"
+                    href={href}
+                    className="inline-flex text-sm items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    [{new URL(href || "example.com").hostname}]
+                    {children}
+                    <SquareArrowOutUpRight className="h-3 w-3" />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="flex items-center gap-2 bg-black p-1">
-                  <SquareArrowOutUpRight className="h-4 w-4" />
-                  <span>{href?.slice(0, 50) + "..."}</span>
+                <TooltipContent side="top" className="bg-gray-800 px-3 py-1.5">
+                  {href}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           );
         },
       }}
-      className="text-sm"
+      className={cn(
+        "prose prose-invert max-w-none",
+        "prose-headings:mb-4 prose-headings:font-semibold",
+        "prose-p:leading-7",
+        "prose-pre:p-0 prose-pre:bg-transparent",
+        "prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:bg-gray-800",
+        "prose-img:rounded-lg",
+        className
+      )}
     >
       {children}
     </ReactMarkdown>
@@ -166,6 +217,8 @@ export const NonMemoizedMarkdown: FC<NonMemoizedMarkdownProps> = ({
 };
 
 export const Markdown = memo(
-  NonMemoizedMarkdown,
-  (prevProps, nextProps) => prevProps.children === nextProps.children
+  PureMarkdown,
+  (prevProps, nextProps) =>
+    prevProps.children === nextProps.children &&
+    prevProps.className === nextProps.className
 );

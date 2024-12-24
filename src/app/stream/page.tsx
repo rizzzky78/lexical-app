@@ -22,31 +22,28 @@ export default function Home() {
   const suggestedActions = [
     { title: "View all", label: "my cameras", action: "View all my cameras" },
     {
-      title: "Show me",
-      label: "my smart home hub",
-      action: "Show me my smart home hub",
+      title: "Search for",
+      label: "Intel Arc GPU",
+      action: "search for intel arc",
     },
     {
-      title: "How much",
-      label: "electricity have I used this month?",
-      action: "Show electricity usage",
+      title: "Search for",
+      label: "acer nitro 5",
+      action: "search for acer nitro 5",
     },
     {
-      title: "How much",
-      label: "water have I used this month?",
-      action: "Show water usage",
+      title: "Search for",
+      label: "poco x6",
+      action: "search for poco x6",
     },
   ];
 
   return (
-    <div className="flex flex-row justify-center pb-20 h-dvh bg-white dark:bg-zinc-900">
-      <div className="flex flex-col justify-between gap-4">
-        <div
-          ref={messagesContainerRef}
-          className="flex flex-col gap-3 h-full w-dvw items-center overflow-y-scroll"
-        >
+    <div className="px-8 sm:px-12 pt-12 md:pt-14 pb-14 md:pb-24 max-w-3xl mx-auto flex flex-col space-y-3 md:space-y-4">
+      <div className="">
+        <div ref={messagesContainerRef} className="">
           {messages.length === 0 && (
-            <motion.div className="h-[350px] px-4 w-full md:w-[500px] md:px-0 pt-20">
+            <motion.div className="h-[350px] px-4 w-full md:px-0 pt-20">
               <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm dark:text-zinc-400 dark:border-zinc-700">
                 <p className="flex flex-row justify-center gap-4 items-center text-zinc-900 dark:text-zinc-50">
                   <Aperture />
@@ -66,9 +63,9 @@ export default function Home() {
                     href="https://sdk.vercel.ai/docs/ai-sdk-rsc/streaming-react-components"
                     target="_blank"
                   >
-                    streamUI{" "}
+                    streamUI
                   </Link>
-                  hook from Vercel AI SDK.
+                  <span>hook from Vercel AI SDK.</span>
                 </p>
               </div>
             </motion.div>
@@ -77,9 +74,9 @@ export default function Home() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-2 w-full max-w-2xl px-4 md:px-0 mx-auto mb-4">
-          {messages.length === 0 &&
-            suggestedActions.map((action, index) => (
+        {messages.length === 0 && (
+          <div className="grid sm:grid-cols-2 gap-2 w-full max-w-2xl px-4 md:px-0 mx-auto mb-4">
+            {suggestedActions.map((action, index) => (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -114,7 +111,8 @@ export default function Home() {
                 </button>
               </motion.div>
             ))}
-        </div>
+          </div>
+        )}
 
         <form
           className="flex flex-col gap-2 relative items-center"
@@ -133,13 +131,13 @@ export default function Home() {
             setInput("");
 
             const { value }: SendMessageCallback = await sendMessage(f);
-            
+
             setMessages((messages) => [...messages, value]);
           }}
         >
           <input
             ref={inputRef}
-            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300 md:max-w-[500px] max-w-[calc(100dvw-32px)]"
+            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300"
             placeholder="Send a message..."
             value={input}
             onChange={(event) => {

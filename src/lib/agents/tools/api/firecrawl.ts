@@ -1,5 +1,9 @@
 "use server";
 
+/**
+ * This module is run on server
+ */
+
 import {
   ScrapeRequest,
   scrapeInputSchema,
