@@ -120,7 +120,9 @@ export const PureMarkdown: FC<MarkdownProps> = ({ children, className }) => {
           </h4>
         ),
         p: ({ children }) => (
-          <p className="text-sm leading-7 [&:not(:first-child)]:mt-4">{children}</p>
+          <p className="text-sm leading-7 [&:not(:first-child)]:mt-4">
+            {children}
+          </p>
         ),
         ul: ({ children }) => (
           <ul className="my-4 ml-6 list-disc [&>li]:mt-2">{children}</ul>
@@ -129,7 +131,7 @@ export const PureMarkdown: FC<MarkdownProps> = ({ children, className }) => {
           <ol className="my-4 ml-6 list-decimal [&>li]:mt-2">{children}</ol>
         ),
         li: ({ children }) => <li className="text-sm leading-7">{children}</li>,
-        code({ className, children, ...props }) {
+        code({ className, children }) {
           const match = /language-(\w+)/.exec(className || "");
           const language = match ? match[1] : "";
           const isInline = !match;
@@ -189,7 +191,7 @@ export const PureMarkdown: FC<MarkdownProps> = ({ children, className }) => {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {children}
+                    {new URL(href).hostname}
                     <SquareArrowOutUpRight className="h-3 w-3" />
                   </a>
                 </TooltipTrigger>

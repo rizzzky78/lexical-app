@@ -5,14 +5,14 @@ import {
 import {
   SYSTEM_INSTRUCT_INSIGHT,
   SYSTEM_INSTRUCT_PRODUCTS,
+  SYSTEM_INSTRUCT_RELATED,
 } from "@/lib/agents/system-instructions";
 import { scrapeUrl } from "@/lib/agents/tools/api/firecrawl";
 import { google } from "@ai-sdk/google";
 import {
   CoreMessage,
   generateId,
-  generateObject,
-  LanguageModelV1StreamPart,
+  generateText,
   streamObject,
   streamText,
 } from "ai";
@@ -20,50 +20,50 @@ import {
   createAI,
   createStreamableUI,
   createStreamableValue,
+  getAIState,
   getMutableAIState,
   streamUI,
 } from "ai/rsc";
-import { ReactNode } from "react";
 import { z } from "zod";
-import { mutateTool } from "./handler";
-import { ObjectStreamMessage } from "@/components/kratos/testing/object";
-import {
-  ProductCardContainer,
-  // ProductCardContainerStream,
-} from "@/components/kratos/product-card-container";
-import { PartialProductsResponse, ProductsResponse } from "@/lib/types/general";
+import { ProductCardContainer } from "@/components/kratos/product-card-container";
+import { PartialRelated, ProductsResponse } from "@/lib/types/general";
 import { xai } from "@ai-sdk/xai";
+import { RelatedMessage } from "@/components/kratos/related-message";
+import { getServerSession } from "next-auth";
+import { getChat } from "@/lib/agents/action/chat-service";
+import { _debugHelper } from "@/lib/utility/debug/root";
+import {
+  SendMessageCallback,
+  AIState,
+  UIState,
+  UseAction,
+} from "@/lib/types/ai";
+import {
+  handleSaveChat,
+  mutateTool,
+  toCoreMessage,
+} from "@/lib/agents/action/server-action-handler";
 
-export type UseAction = {
-  sendMessage: (f: FormData) => any;
-};
-
-export type SendMessageCallback = {
-  value: ReactNode;
-  stream: ReadableStream<LanguageModelV1StreamPart>;
-};
-
-export type AIState = {
-  chatId: string;
-  messages: CoreMessage[];
-  isSharedPage?: boolean;
-};
-
-export type UIState = {
-  id: string;
-  display: ReactNode;
-}[];
-
-const sendMessage = async (f: FormData) => {
+const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
   "use server";
 
   const userMessage = f.get("text_input") as string;
 
-  const aiState = getMutableAIState<typeof AI>("messages");
+  console.log(`triggered server action - sendMessage, meta: ${userMessage}`);
 
-  const currentAIState = aiState.get() as CoreMessage[];
+  const aiState = getMutableAIState<typeof AI>();
 
-  aiState.update([...currentAIState, { role: "user", content: userMessage }]);
+  aiState.update({
+    ...aiState.get(),
+    messages: [
+      ...aiState.get().messages,
+      {
+        id: generateId(),
+        role: "user",
+        content: userMessage,
+      },
+    ],
+  });
 
   const streamableText = createStreamableValue<string>("");
 
@@ -72,13 +72,20 @@ const sendMessage = async (f: FormData) => {
   const { value, stream } = await streamUI({
     model: google("gemini-2.0-flash-exp"),
     system: `You are very helpfull assistant!`,
-    messages: aiState.get() as CoreMessage[],
+    messages: toCoreMessage(aiState.get().messages),
     text: async function* ({ content, done, delta }) {
       if (done) {
-        aiState.done([
-          ...(aiState.get() as CoreMessage[]),
-          { role: "assistant", content },
-        ]);
+        aiState.done({
+          ...aiState.get(),
+          messages: [
+            ...aiState.get().messages,
+            {
+              id: generateId(),
+              role: "assistant",
+              content,
+            },
+          ],
+        });
       } else {
         streamableText.update(content);
       }
@@ -93,7 +100,6 @@ const sendMessage = async (f: FormData) => {
         }),
         generate: async function* ({ query }) {
           let finalizedResults: ProductsResponse = { data: [] };
-          let finalizedPartialResults: PartialProductsResponse = {};
 
           const uiStream = createStreamableUI(
             <div>
@@ -146,20 +152,15 @@ const sendMessage = async (f: FormData) => {
               markdown: scrapeContent.markdown,
             };
 
-            // await new Promise((resolve) => setTimeout(resolve, 3000));
-
             const streamableObject = createStreamableValue<any>();
 
-            // uiStream.update(
-            //   // <ProductCardContainerStream
-            //   //   key={"stream-key"}
-            //   //   content={streamableObject.value}
-            //   // />
-            //   <ObjectStreamMessage content={streamableObject.value} />
-            // );
-
             uiStream.update(
-              <ProductCardContainer content={{ data: [] }} isFinished={false} />
+              <Message role={"assistant"}>
+                <ProductCardContainer
+                  content={{ data: [] }}
+                  isFinished={false}
+                />
+              </Message>
             );
 
             yield uiStream.value;
@@ -196,11 +197,8 @@ const sendMessage = async (f: FormData) => {
               },
             });
 
-            // yield uiStream.value;
-
             for await (const chunk of partialObjectStream) {
               streamableObject.update(chunk);
-              finalizedPartialResults = chunk;
               console.log(chunk);
             }
 
@@ -236,7 +234,6 @@ const sendMessage = async (f: FormData) => {
           for await (const texts of textStream) {
             finalizedText += texts;
             streamableText.update(finalizedText);
-            process.stdout.write(texts);
           }
 
           streamableText.done();
@@ -250,7 +247,47 @@ const sendMessage = async (f: FormData) => {
             },
           });
 
-          aiState.done([...(aiState.get() as CoreMessage[]), ...mutate]);
+          aiState.done({
+            ...aiState.get(),
+            messages: [...aiState.get().messages, ...mutate],
+          });
+
+          const streamableRelated = createStreamableValue<PartialRelated>();
+
+          uiStream.append(
+            <Message role={"assistant"}>
+              <RelatedMessage relatedQueries={streamableRelated.value} />
+            </Message>
+          );
+
+          yield uiStream.value;
+
+          const payloadRelated = toCoreMessage(aiState.get().messages);
+
+          const relateds = streamObject({
+            model: google("gemini-1.5-pro"),
+            system: SYSTEM_INSTRUCT_RELATED,
+            prompt: JSON.stringify(
+              payloadRelated.filter((m) => m.role !== "tool")
+            ),
+            schema: z.object({
+              items: z
+                .array(
+                  z.object({
+                    query: z.string(),
+                  })
+                )
+                .length(3),
+            }),
+          });
+
+          for await (const related of relateds.partialObjectStream) {
+            streamableRelated.update(related);
+          }
+
+          streamableRelated.done();
+
+          uiStream.done();
 
           return uiStream.value;
         },
@@ -258,7 +295,7 @@ const sendMessage = async (f: FormData) => {
     },
   });
 
-  return { value, stream };
+  return { id: generateId(), display: value, stream };
 };
 
 /**
@@ -279,7 +316,31 @@ export const AI = createAI<AIState, UIState, UseAction>({
     "use server";
 
     if (done) {
-      // save
+      _debugHelper("ai-state", state);
+      await handleSaveChat(state);
     }
   },
+  // onGetUIState: async () => {
+  //   'use server'
+
+  //   const aiState = getAIState<typeof AI>()
+
+  //   if (aiState) {
+  //     const uiState =
+  //   } else {
+  //     return
+  //   }
+  // }
 });
+
+export interface ExtendedCoreMessage extends Omit<CoreMessage, "id"> {
+  id: string;
+}
+
+export const mapUIState = (state: AIState) => {
+  const messages: ExtendedCoreMessage[] = Array.isArray(state.messages)
+    ? state.messages.map((m) => ({ ...m, id: generateId() }))
+    : [];
+
+  const x = messages.map(({ id }) => {});
+};

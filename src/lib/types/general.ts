@@ -21,3 +21,11 @@ export type ProductsResponse = {
 };
 
 export type PartialProductsResponse = DeepPartial<ProductsResponse>;
+
+export type Related = {
+  items: {
+    query: string;
+  }[];
+};
+
+export type PartialRelated = DeepPartial<Related>;

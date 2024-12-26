@@ -1,19 +1,23 @@
 "use client";
 
-import { ReactNode, useRef, useState } from "react";
-import { useActions } from "ai/rsc";
+import { FormEvent, useRef, useState } from "react";
+import { useActions, useUIState } from "ai/rsc";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { Airplay, Aperture } from "lucide-react";
 import { Message } from "@/components/kratos/testing/message";
-import { AI, SendMessageCallback } from "../(server-action)/action-single";
+import { AI } from "../(server-action)/action-single";
+import { useAppState } from "@/lib/utility/provider/app-state";
+import { generateId } from "ai";
 
 export default function Home() {
   const { sendMessage } = useActions<typeof AI>();
+  const [uiState, setUIState] = useUIState<typeof AI>();
+
+  const { isGenerating, setIsGenerating } = useAppState();
 
   const [input, setInput] = useState<string>("");
-  const [messages, setMessages] = useState<Array<ReactNode>>([]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [messagesContainerRef, messagesEndRef] =
@@ -38,11 +42,67 @@ export default function Home() {
     },
   ];
 
+  const handleActionSubmit = async (action: string) => {
+    setIsGenerating(true);
+
+    setUIState((messages) => [
+      ...messages,
+      {
+        id: generateId(),
+        display: (
+          <Message key={messages.length} role="user">
+            {action}
+          </Message>
+        ),
+      },
+    ]);
+
+    const f = new FormData();
+
+    f.append("text_input", action);
+
+    const { id, display } = await sendMessage(f);
+
+    setUIState((messages) => [...messages, { id, display }]);
+
+    setIsGenerating(false);
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setIsGenerating(true);
+
+    setUIState((messages) => [
+      ...messages,
+      {
+        id: generateId(),
+        display: (
+          <Message key={messages.length} role="user">
+            {input}
+          </Message>
+        ),
+      },
+    ]);
+
+    const f = new FormData();
+
+    f.append("text_input", input);
+
+    setInput("");
+
+    const { id, display } = await sendMessage(f);
+
+    setUIState((messages) => [...messages, { id, display }]);
+
+    setIsGenerating(false);
+  };
+
   return (
     <div className="px-8 sm:px-12 pt-12 md:pt-14 pb-14 md:pb-24 max-w-3xl mx-auto flex flex-col space-y-3 md:space-y-4">
       <div className="">
         <div ref={messagesContainerRef} className="">
-          {messages.length === 0 && (
+          {uiState.length === 0 && (
             <motion.div className="h-[350px] px-4 w-full md:px-0 pt-20">
               <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm dark:text-zinc-400 dark:border-zinc-700">
                 <p className="flex flex-row justify-center gap-4 items-center text-zinc-900 dark:text-zinc-50">
@@ -70,11 +130,12 @@ export default function Home() {
               </div>
             </motion.div>
           )}
-          {messages.map((message) => message)}
+          {/* {messages.map((message) => message)} */}
+          {uiState.map((v) => v.display)}
           <div ref={messagesEndRef} />
         </div>
 
-        {messages.length === 0 && (
+        {uiState.length === 0 && (
           <div className="grid sm:grid-cols-2 gap-2 w-full max-w-2xl px-4 md:px-0 mx-auto mb-4">
             {suggestedActions.map((action, index) => (
               <motion.div
@@ -85,23 +146,7 @@ export default function Home() {
                 className={index > 1 ? "hidden sm:block" : "block"}
               >
                 <button
-                  onClick={async () => {
-                    setMessages((messages) => [
-                      ...messages,
-                      <Message
-                        key={messages.length}
-                        role="user"
-                        content={action.action}
-                      />,
-                    ]);
-                    const f = new FormData();
-
-                    f.append("text_input", action.action);
-
-                    const { value }: SendMessageCallback = await sendMessage(f);
-
-                    setMessages((messages) => [...messages, value]);
-                  }}
+                  onClick={async () => await handleActionSubmit(action.action)}
                   className="w-full text-left border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-300 rounded-lg p-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex flex-col"
                 >
                   <span className="font-medium">{action.title}</span>
@@ -116,24 +161,7 @@ export default function Home() {
 
         <form
           className="flex flex-col gap-2 relative items-center"
-          onSubmit={async (event) => {
-            event.preventDefault();
-
-            setMessages((messages) => [
-              ...messages,
-              <Message key={messages.length} role="user" content={input} />,
-            ]);
-
-            const f = new FormData();
-
-            f.append("text_input", input);
-
-            setInput("");
-
-            const { value }: SendMessageCallback = await sendMessage(f);
-
-            setMessages((messages) => [...messages, value]);
-          }}
+          onSubmit={handleSubmit}
         >
           <input
             ref={inputRef}

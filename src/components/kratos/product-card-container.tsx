@@ -1,10 +1,14 @@
 "use client";
 
 import { ProductsResponse } from "@/lib/types/general";
-import { FC } from "react";
+import { FC, ReactNode, useId, useState } from "react";
 import { ProductCard } from "./product-card";
 import { motion } from "framer-motion";
 import { ProductCardSkeleton } from "./skeleton-product-card";
+import { useAppState } from "@/lib/utility/provider/app-state";
+import { useActions } from "ai/rsc";
+import { Message } from "./testing/message";
+import { AI } from "@/app/(server-action)/action-single";
 
 interface ProductCardContainerProps {
   content: ProductsResponse;
@@ -45,7 +49,7 @@ export const ProductCardContainer: FC<ProductCardContainerProps> = ({
                 <ProductCard product={product} isFinished={isFinished} />
               </motion.div>
             ))
-          : Array.from({ length: 6 }).map((_, idx) => (
+          : Array.from({ length: 3 }).map((_, idx) => (
               <motion.div key={`product-${idx}`} variants={itemVariants}>
                 <ProductCardSkeleton />
               </motion.div>

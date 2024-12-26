@@ -7,9 +7,7 @@ import {
   ShieldCheck,
   Store,
   BadgeDollarSign,
-  ShoppingBag,
   Package,
-  SquareArrowRight,
   CircleArrowRight,
 } from "lucide-react";
 import Image from "next/image";
@@ -19,11 +17,12 @@ import { motion } from "framer-motion";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
-import { ReactNode, useState } from "react";
-import { useActions } from "ai/rsc";
-import { AI, SendMessageCallback } from "@/app/(server-action)/action-single";
+import { useAppState } from "@/lib/utility/provider/app-state";
+import { useActions, useUIState } from "ai/rsc";
+import { AI } from "@/app/(server-action)/action-single";
+import { useState, ReactNode, useId } from "react";
 import { Message } from "./testing/message";
-import { Separator } from "../ui/separator";
+import { generateId } from "ai";
 
 interface ProductCardProps {
   product: Partial<Product>;
@@ -31,6 +30,39 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, isFinished }: ProductCardProps) {
+  const { isGenerating, setIsGenerating } = useAppState();
+  const { sendMessage } = useActions<typeof AI>();
+  const [uiState, setUIState] = useUIState<typeof AI>();
+
+  const [messages, setMessages] = useState<ReactNode[]>([]);
+
+  const id = useId();
+
+  const handleActionSubmit = async (action: string) => {
+    setIsGenerating(true);
+
+    setUIState((messages) => [
+      ...messages,
+      {
+        id: generateId(),
+        display: (
+          <Message key={messages.length} role="user">
+            {action}
+          </Message>
+        ),
+      },
+    ]);
+
+    const f = new FormData();
+    f.append("text_input", action);
+
+    const { id, display } = await sendMessage(f);
+
+    setUIState((messages) => [...messages, { id, display }]);
+
+    setIsGenerating(false);
+  };
+
   const { title, image, price, rating, sold, link, store } = product;
 
   const fallbackImgUrl = `https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`;
@@ -50,9 +82,6 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
       transition: { duration: 0.2 },
     },
   };
-
-  const { sendMessage } = useActions<typeof AI>();
-  const [messages, setMessages] = useState<ReactNode[]>([]);
 
   return (
     <motion.div
@@ -124,7 +153,11 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
             </div>
           </div>
           <div className="px-2 space-x-2 pb-3 flex *:text-xs items-center justify-between pt-2">
-            <Button className="relative ml-1 h-7 w-full overflow-hidden rounded-lg px-6 font-bold bg-gray-300 text-black shadow-sm transition-all duration-300 hover:bg-blue-200 hover:text-indigo-900">
+            <Button
+              className="relative ml-2 h-7 w-full overflow-hidden rounded-lg px-6 font-bold bg-gray-300 text-black shadow-sm transition-all duration-300 hover:bg-blue-200 hover:text-indigo-900"
+              onClick={async () => await handleActionSubmit(link!)}
+              disabled={isGenerating}
+            >
               <span className="relative z-10">Ask AI</span>
               <div
                 className="absolute inset-0 flex items-center justify-center"
@@ -140,7 +173,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
                     href={link || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex rounded-full h-7 pr-1 items-center"
+                    className="flex rounded-full h-7 pr-2 items-center"
                   >
                     <CircleArrowRight className="text-purple-200 h-7 w-7" />
                   </Link>

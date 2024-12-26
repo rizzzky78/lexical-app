@@ -52,12 +52,7 @@ export function mutateTool(payload: Payload) {
   if (payload.overrideAssistant) {
     mutationToolCall.push({
       role: "assistant",
-      content: [
-        {
-          type: "text",
-          text: payload.overrideAssistant.content,
-        },
-      ],
+      content: payload.overrideAssistant.content,
     });
   }
 
