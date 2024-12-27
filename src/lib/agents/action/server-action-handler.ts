@@ -116,3 +116,5 @@ export const handleSaveChat = async (state: AIState) => {
 export const toCoreMessage = (m: MessageProperty[]): CoreMessage[] => {
   return m.map((m) => ({ role: m.role, content: m.content } as CoreMessage));
 };
+
+

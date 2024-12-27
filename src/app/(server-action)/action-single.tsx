@@ -9,13 +9,7 @@ import {
 } from "@/lib/agents/system-instructions";
 import { scrapeUrl } from "@/lib/agents/tools/api/firecrawl";
 import { google } from "@ai-sdk/google";
-import {
-  CoreMessage,
-  generateId,
-  generateText,
-  streamObject,
-  streamText,
-} from "ai";
+import { generateId, streamObject, streamText } from "ai";
 import {
   createAI,
   createStreamableUI,
@@ -29,8 +23,6 @@ import { ProductCardContainer } from "@/components/kratos/product-card-container
 import { PartialRelated, ProductsResponse } from "@/lib/types/general";
 import { xai } from "@ai-sdk/xai";
 import { RelatedMessage } from "@/components/kratos/related-message";
-import { getServerSession } from "next-auth";
-import { getChat } from "@/lib/agents/action/chat-service";
 import { _debugHelper } from "@/lib/utility/debug/root";
 import {
   SendMessageCallback,
@@ -43,6 +35,8 @@ import {
   mutateTool,
   toCoreMessage,
 } from "@/lib/agents/action/server-action-handler";
+import { mapUIState } from "@/lib/agents/action/map-ui-state";
+import { productSchema } from "@/lib/agents/schema/product-schema";
 
 const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
   "use server";
@@ -169,27 +163,7 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
               model: google("gemini-2.0-flash-exp"),
               system: SYSTEM_INSTRUCT_PRODUCTS,
               prompt: JSON.stringify(payload),
-              schema: z.object({
-                data: z.array(
-                  z.object({
-                    title: z.string().describe("Product title or name"),
-                    image: z.string().describe("Product image URL"),
-                    price: z.string().describe("Product price"),
-                    rating: z
-                      .string()
-                      .describe("Product rating from 0.0 to 5.0"),
-                    sold: z.string().describe("Number of products sold"),
-                    link: z.string().describe("Product detail page URL"),
-                    store: z.object({
-                      name: z.string().describe("Store or seller name"),
-                      location: z.string().describe("Store location"),
-                      isOfficial: z
-                        .boolean()
-                        .describe("Whether the store is an official store"),
-                    }),
-                  })
-                ),
-              }),
+              schema: productSchema,
               onFinish: async ({ object }) => {
                 if (object) {
                   finalizedResults = object;
@@ -320,27 +294,16 @@ export const AI = createAI<AIState, UIState, UseAction>({
       await handleSaveChat(state);
     }
   },
-  // onGetUIState: async () => {
-  //   'use server'
+  onGetUIState: async () => {
+    "use server";
 
-  //   const aiState = getAIState<typeof AI>()
+    const aiState = getAIState<typeof AI>();
 
-  //   if (aiState) {
-  //     const uiState =
-  //   } else {
-  //     return
-  //   }
-  // }
+    if (aiState) {
+      const uiState = mapUIState(aiState);
+      return uiState;
+    } else {
+      return;
+    }
+  },
 });
-
-export interface ExtendedCoreMessage extends Omit<CoreMessage, "id"> {
-  id: string;
-}
-
-export const mapUIState = (state: AIState) => {
-  const messages: ExtendedCoreMessage[] = Array.isArray(state.messages)
-    ? state.messages.map((m) => ({ ...m, id: generateId() }))
-    : [];
-
-  const x = messages.map(({ id }) => {});
-};

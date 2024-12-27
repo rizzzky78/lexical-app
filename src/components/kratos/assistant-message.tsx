@@ -1,58 +1,52 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Check, Copy } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState } from "react";
 import { Markdown } from "./markdown";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { Button } from "../ui/button";
+import { Check, Copy } from "lucide-react";
 
-interface AssistantMessageProps {
+interface UserMessageProps {
   content: string;
 }
 
-export default function AssistantMessage({ content }: AssistantMessageProps) {
+export function AssistantMessage({ content }: UserMessageProps) {
   const [copied, setCopied] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const copyToClipboard = () => {
-    return () => {
-      navigator.clipboard.writeText(content);
-      setCopied(true);
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current); // Clear any existing timeout
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        setCopied(false);
-        timeoutRef.current = null; // Clean up ref
-      }, 2000);
-    };
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="flex items-start space-x-2">
-      <div className="flex-grow text-[#343131]">
-        <Markdown>{content}</Markdown>
+    <div className="flex justify-start mb-4 py-5">
+      <div className="w-full py-3 px-5 rounded-[2rem]">
+        <div className="group relative">
+          <Markdown>{content}</Markdown>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="absolute rounded-full text-white h-8 w-1 -bottom-8 left-3 bg-[#1A1A1D] opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={copyToClipboard}
+                >
+                  {copied ? <Check /> : <Copy />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{copied ? "Copied!" : "Copy to clipboard"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-      >
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={copyToClipboard}
-          className="text-[#343131] hover:text-[#1A1A1D] hover:bg-[#FFF0DC]"
-        >
-          {copied ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
-        </Button>
-      </motion.div>
     </div>
   );
 }

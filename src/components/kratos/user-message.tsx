@@ -1,43 +1,54 @@
-/* eslint-disable @next/next/no-img-element */
-import { Card } from "@/components/ui/card";
-import { MessageProperty } from "@/lib/types/ai";
-import { CoreUserMessage, FilePart, ImagePart, TextPart } from "ai";
+"use client";
+
+import { useState } from "react";
+import { Markdown } from "./markdown";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { Button } from "../ui/button";
+import { Check, Copy } from "lucide-react";
 
 interface UserMessageProps {
-  message: CoreUserMessage;
+  content: string;
 }
 
-export default function UserMessage({ message }: UserMessageProps) {
-  const renderContent = (content: TextPart | ImagePart | FilePart) => {
-    switch (content.type) {
-      case "text":
-        return <p className="text-sm">{content.text}</p>;
-      case "image":
-        return (
-          <img
-            src={content.image as string}
-            alt="User attachment"
-            className="max-w-full h-auto rounded-lg"
-          />
-        );
-      case "file":
-        return <p className="text-sm">File: NAME</p>;
-      default:
-        return null;
-    }
+export function UserMessage({ content }: UserMessageProps) {
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="flex justify-end">
-      <Card className="bg-[#FFF0DC] text-[#343131] p-3 rounded-full max-w-[80%]">
-        {Array.isArray(message.content)
-          ? message.content.map((content, index) => (
-              <div key={index} className="mb-2 last:mb-0">
-                {renderContent(content)}
-              </div>
-            ))
-          : renderContent({ type: "text", text: message.content })}
-      </Card>
+    <div className="flex justify-end mb-4">
+      <div className="bg-[#343131] w-fit max-w-[90%] py-3 px-5 rounded-[2rem]">
+        <div className="group relative">
+          <Markdown className="whitespace-pre-wrap text-white">
+            {content}
+          </Markdown>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="absolute rounded-full text-white h-8 w-1 -bottom-8 right-3 bg-[#1A1A1D] opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={copyToClipboard}
+                >
+                  {copied ? <Check /> : <Copy />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{copied ? "Copied!" : "Copy to clipboard"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
     </div>
   );
 }

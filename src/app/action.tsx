@@ -17,7 +17,7 @@ import {
 import { getServerSession } from "next-auth";
 import { titleCrafter } from "@/lib/agents/workflow/title-crafter";
 import { getChat, saveChat } from "@/lib/agents/action/chat-service";
-import { mapUIState } from "@/lib/agents/action/get-ui-state";
+import { mapUIState } from "@/lib/agents/action/map-ui-state";
 import { FollowupPanel } from "@/components/kratos/assistant-messages/followup-panel";
 import { CopilotInquiry } from "@/components/kratos/assistant-messages/inquiry";
 import { NextAction } from "@/lib/agents/schema/next-action";
