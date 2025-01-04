@@ -1,8 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { Chat } from "@/components/kratos/main/chat";
-import { getChat } from "@/lib/agents/action/chat-service";
+import { Chat } from "@/components/kratos/chat";
+import { getChat, getChats } from "@/lib/agents/action/chat-service";
 import { AI } from "@/app/(server-action)/action-single";
+import { cache } from "react";
 
 export const maxDuration = 60;
 
@@ -11,6 +12,10 @@ export interface SearchPageProps {
     id: string;
   };
 }
+
+const loadChats = cache(async (userId: string) => {
+  return await getChats(userId);
+});
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>;
@@ -31,12 +36,13 @@ export default async function SearchPage(props: {
   const { id } = params;
 
   const session = await getServerSession();
+  const chats = await loadChats(session?.user?.email || "anonymous");
 
   const userId = session?.user?.email as string;
   const chat = await getChat(id);
 
   if (!chat) {
-    redirect("/rsc");
+    redirect("/chat");
   }
 
   if (chat?.userId !== userId) {
@@ -50,7 +56,7 @@ export default async function SearchPage(props: {
         messages: chat.messages,
       }}
     >
-      <Chat id={id} />
+      <Chat id={id} session={session} chats={chats} />
     </AI>
   );
 }

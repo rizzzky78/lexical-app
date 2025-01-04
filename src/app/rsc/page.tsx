@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { v4 } from "uuid";
 import { AI } from "@/app/action";
-import { Chat } from "@/components/kratos/main/chat";
+import { Chat } from "@/components/kratos/chat";
 
 export const maxDuration = 60;
 

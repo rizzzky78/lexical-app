@@ -25,7 +25,7 @@ export function UserMessage({ content }: UserMessageProps) {
   };
 
   return (
-    <div className="flex justify-end mb-4">
+    <div className="flex justify-end py-7">
       <div className="bg-[#343131] w-fit max-w-[90%] py-3 px-5 rounded-[2rem]">
         <div className="group relative">
           <Markdown className="whitespace-pre-wrap text-white">

@@ -40,3 +40,32 @@ export type UIState = {
   id: string;
   display: ReactNode;
 }[];
+
+export const AvailableTools = {
+  SEARCH_PRODUCT: "searchProduct",
+  GET_PRODUCT_DETAILS: "getProductDetails",
+} as const;
+
+export type AvailableTool =
+  (typeof AvailableTools)[keyof typeof AvailableTools];
+
+export type MutationPayload = {
+  name: AvailableTool;
+  args: unknown;
+  result: unknown;
+  overrideAssistant?: {
+    content: string;
+  };
+};
+
+/**
+ * Construct type from defined tool args and tool result data
+ * @type `A = unknown` is for args
+ * @type `T = unknown` is for data or tool result
+ */
+export type ExtendedToolResult<A = unknown, D = unknown> = {
+  success: boolean;
+  name: string;
+  args: A;
+  data: D;
+};

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useId, useRef, useState } from "react";
 import { useActions, useUIState } from "ai/rsc";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import { Message } from "@/components/kratos/testing/message";
 import { AI } from "../(server-action)/action-single";
 import { useAppState } from "@/lib/utility/provider/app-state";
 import { generateId } from "ai";
+import { UserMessage } from "@/components/kratos/user-message";
 
 export default function Home() {
   const { sendMessage } = useActions<typeof AI>();
@@ -42,6 +43,8 @@ export default function Home() {
     },
   ];
 
+  const componentId = useId();
+
   const handleActionSubmit = async (action: string) => {
     setIsGenerating(true);
 
@@ -49,11 +52,7 @@ export default function Home() {
       ...messages,
       {
         id: generateId(),
-        display: (
-          <Message key={messages.length} role="user">
-            {action}
-          </Message>
-        ),
+        display: <UserMessage key={componentId} content={action} />,
       },
     ]);
 
@@ -71,17 +70,15 @@ export default function Home() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (isGenerating) return;
+
     setIsGenerating(true);
 
     setUIState((messages) => [
       ...messages,
       {
         id: generateId(),
-        display: (
-          <Message key={messages.length} role="user">
-            {input}
-          </Message>
-        ),
+        display: <UserMessage key={componentId} content={input} />,
       },
     ]);
 
@@ -160,7 +157,7 @@ export default function Home() {
         )}
 
         <form
-          className="flex flex-col gap-2 relative items-center"
+          className="flex flex-col gap-2 relative items-center pt-10"
           onSubmit={handleSubmit}
         >
           <input

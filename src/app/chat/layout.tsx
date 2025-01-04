@@ -1,4 +1,5 @@
 import { Header } from "@/components/kratos/essentials/header";
+import { AppStateProvider } from "@/lib/utility/provider/app-state";
 import { ReactNode } from "react";
 
 interface ChatLayoutProps {
@@ -8,8 +9,7 @@ interface ChatLayoutProps {
 export default function ChatLayout({ children }: ChatLayoutProps) {
   return (
     <div>
-      <Header />
-      <div>{children}</div>
+      <AppStateProvider>{children}</AppStateProvider>
     </div>
   );
 }

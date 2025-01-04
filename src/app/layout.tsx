@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Noto_Serif } from "next/font/google";
 import { ThemeProvider } from "@/components/provider/theme-provider";
 import { Header } from "@/components/kratos/essentials/header";
+import { Toaster } from "sonner";
 
 const notoSerif = Noto_Serif({
   weight: "300",
@@ -22,7 +23,6 @@ export const metadata: Metadata = {
     "Next.js AI app",
     "LexAna",
   ],
-  authors: [{ name: "Casper Halcro", url: "https://your-portfolio-site.com" }],
 };
 
 export default function RootLayout({
@@ -40,7 +40,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
+          <Toaster />
+          {/* <Header /> */}
           {children}
         </ThemeProvider>
       </body>

@@ -1,7 +1,7 @@
 "use client";
 
 import { ProductsResponse } from "@/lib/types/general";
-import { FC, ReactNode, useId, useState } from "react";
+import { FC, ReactNode, useEffect, useId, useState } from "react";
 import { ProductCard } from "./product-card";
 import { motion } from "framer-motion";
 import { ProductCardSkeleton } from "./skeleton-product-card";
@@ -35,6 +35,12 @@ export const ProductCardContainer: FC<ProductCardContainerProps> = ({
     visible: { opacity: 1, y: 0 },
   };
 
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setActive(true), 1000);
+  }, [active]);
+
   return (
     <div>
       <motion.div
@@ -43,17 +49,18 @@ export const ProductCardContainer: FC<ProductCardContainerProps> = ({
         initial="hidden"
         animate="visible"
       >
-        {isFinished
-          ? products.map((product, index) => (
-              <motion.div key={`product-${index}`} variants={itemVariants}>
-                <ProductCard product={product} isFinished={isFinished} />
-              </motion.div>
-            ))
-          : Array.from({ length: 3 }).map((_, idx) => (
-              <motion.div key={`product-${idx}`} variants={itemVariants}>
-                <ProductCardSkeleton />
-              </motion.div>
-            ))}
+        {active &&
+          products.map((product, index) => (
+            <motion.div key={`product-${index}`} variants={itemVariants}>
+              <ProductCard product={product} isFinished={isFinished} />
+            </motion.div>
+          ))}
+        {!active &&
+          Array.from({ length: 3 }).map((_, idx) => (
+            <motion.div key={`product-${idx}`} variants={itemVariants}>
+              <ProductCardSkeleton />
+            </motion.div>
+          ))}
       </motion.div>
     </div>
   );

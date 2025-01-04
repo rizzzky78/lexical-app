@@ -7,64 +7,42 @@ import { AppStateProvider } from "@/lib/utility/provider/app-state";
 
 const chatData: MessageProperty[] = [
   {
-    id: "cjkdsaknhaihdkn",
+    id: "l93Q9jwyeolXJUfX",
     role: "user",
     content: "search for intel arc",
   },
   {
-    id: "dsfdsfscc",
+    id: "xEZdyN83RM0gNaiw",
     role: "assistant",
     content: [
       {
         type: "tool-call",
-        toolCallId: "Fz2fDk2usXpIAApJ",
+        toolCallId: "NpVqBLrEcTBhfDsj",
         toolName: "searchProduct",
         args: {
-          args: "intel arc",
+          query: "intel arc",
         },
       },
     ],
   },
   {
-    id: "ghsdvserf",
+    id: "P2O9sFELSM5r7sj4",
     role: "tool",
     content: [
       {
         type: "tool-result",
-        toolCallId: "Fz2fDk2usXpIAApJ",
+        toolCallId: "NpVqBLrEcTBhfDsj",
         toolName: "searchProduct",
         result:
-          '{"data":[{"title":"Intel ARC A750 Limited Edition VGA 8GB GDDR6 Graphic Card Gaming","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2023/7/6/e1192b48-01dc-43f2-a766-8efa3cb8b29b.png.webp?ect=4g","price":"Rp4.097.380","rating":"5.0","sold":"15 terjual","link":"https://www.tokopedia.com/gimugimu/intel-arc-a750-limited-edition-vga-8gb-gddr6-graphic-card-gaming?extParam=ivf%3Dfalse%26keyword%3Dintel+arc%26search_id%3D20241225131311A0539D7EA1E90932DTS0%26src%3Dsearch","store":{"name":"Gimu Gimu Store","location":"Jakarta Utara","isOfficial":true}},{"title":"ASROCK Intel ARC A380 6GB GDDR6 LP - Low Profile","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2023/9/14/24d8837b-17fa-4679-9fa4-58eb15a7531a.jpg.webp?ect=4g","price":"Rp1.995.000","rating":"5.0","sold":"60+","link":"https://www.tokopedia.com/tokoexpert/asrock-intel-arc-a380-6gb-gddr6-lp-low-profile?extParam=ivf%3Dfalse%26keyword%3Dintel+arc%26search_id%3D20241225131311A0539D7EA1E90932DTS0%26src%3Dsearch","store":{"name":"toko expert komputer","location":"Jakarta Pusat","isOfficial":true}},{"title":"GIGABYTE Intel ARC A380 Windforce 6GB GDDR6","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/5/2/cf4c1ead-45f0-48f1-98f0-1dd162575be7.jpg.webp?ect=4g","price":"Rp2.085.000","rating":"5.0","sold":"60+","link":"https://www.tokopedia.com/tokoexpert/gigabyte-intel-arc-a380-windforce-6gb-gddr6?extParam=ivf%3Dfalse%26keyword%3Dintel+arc%26search_id%3D20241225131311A0539D7EA1E90932DTS0%26src%3Dsearch","store":{"name":"toko expert komputer","location":"Jakarta Pusat","isOfficial":true}},{"title":"ASROCK INTEL ARC A580 CHALLENGER OC 8GB GDDR6","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2023/11/10/eac425b9-8bc5-487e-bdd5-a6d69a258f71.jpg.webp?ect=4g","price":"Rp2.990.000","rating":"4.9","sold":"7 terjual","link":"https://www.tokopedia.com/tokoexpert/asrock-intel-arc-a580-challenger-oc-8gb-gddr6?extParam=ivf%3Dfalse%26keyword%3Dintel+arc%26search_id%3D20241225131311A0539D7EA1E90932DTS0%26src%3Dsearch","store":{"name":"toko expert komputer","location":"Jakarta Pusat","isOfficial":true}},{"title":"ASROCK Intel ARC A380 CHALLENGER ITX 6GB OC GDDR6","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2022/11/29/cbc5f511-30c1-45fd-b05d-b1b75594f612.jpg.webp?ect=4g","price":"Rp1.990.000","rating":"4.8","sold":"30+","link":"https://www.tokopedia.com/tokoexpert/asrock-intel-arc-a380-challenger-itx-6gb-oc-gddr6?extParam=ivf%3Dfalse%26keyword%3Dintel+arc%26search_id%3D20241225131311A0539D7EA1E90932DTS0%26src%3Dsearch","store":{"name":"toko expert komputer","location":"Jakarta Pusat","isOfficial":true}},{"title":"ASROCK Intel ARC A770 PHANTOM GAMING OC 16GB GDDR6 - A770 PG 16GB OC","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2023/12/5/7447079f-0443-4c73-a2ba-c85f742e47cd.jpg.webp?ect=4g","price":"Rp6.020.000","rating":"5.0","sold":"10 terjual","link":"https://www.tokopedia.com/tokoexpert/asrock-intel-arc-a770-phantom-gaming-oc-16gb-gddr6-a770-pg-16gb-oc?extParam=ivf%3Dfalse%26keyword%3Dintel+arc%26search_id%3D20241225131311A0539D7EA1E90932DTS0%26src%3Dsearch","store":{"name":"toko expert komputer","location":"Jakarta Pusat","isOfficial":true}}]}',
+          '{"success":true,"name":"searchProduct","args":{"query":"intel arc"},"data":{"data":[{"title":"ASRock Intel Arc A750 Challenger D 8GB OC 256Bit DDR6","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2022/11/30/60ac1da6-55af-4a22-9ffe-72afefa6894a.jpg.webp?ect=4g","price":"Rp3.860.000","rating":"4.7","sold":"3 terjual","link":"https://www.tokopedia.com/starseventeen/asrock-intel-arc-a750-challenger-d-8gb-oc-256bit-ddr6?extParam=ivf%3Dfalse%26keyword%3Dintel+arc&src=topads","store":{"name":"STAR SEVENTEEN","location":"Jakarta Selatan","isOfficial":false}},{"title":"Lenovo Yoga Slim 7 OLED Touch Intel Ultra 5 125H 16GB 512GB SSD Windows 11 OHS 14 Inch WUXGA Arc 14IMH9 05ID","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/11/9/0539ddfb-ffbf-45be-8876-27b85785ff64.png.webp?ect=4g","price":"Rp14.799.000","rating":"5.0","sold":"13 terjual","link":"https://www.tokopedia.com/thinkpadofficial/lenovo-yoga-slim-7-oled-touch-intel-ultra-5-125h-16gb-512gb-ssd-windows-11-ohs-14-inch-wuxga-arc-14imh9-05id-windows-11-home-normal-bundling-90496?extParam=ivf%3Dtrue%26keyword%3Dintel+arc%26search_id%3D202412300424051A869164C8B3440174P2%26src%3Dsearch","store":{"name":"Thinkpad Official Store","location":"Jakarta Utara","isOfficial":true}},{"title":"MSI Claw A1M Intel Ultra 7-155H Intel Arc 16GB 7\\" FHD 120Hz IPS Level","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/2/28/6610c208-44bb-4b9c-b68d-8b1424ab797c.jpg.webp?ect=4g","price":"Rp7.599.000","rating":"5.0","sold":"60+ terjual","link":"https://www.tokopedia.com/msi-official/msi-claw-a1m-intel-ultra-7-155h-intel-arc-16gb-7-fhd-120hz-ips-level-512gb-0d900?extParam=ivf%3Dtrue%26keyword%3Dintel+arc%26search_id%3D202412300424051A869164C8B3440174P2%26src%3Dsearch","store":{"name":"MSI Official Store","location":"Jakarta Pusat","isOfficial":true}},{"title":"Asus Zenbook 14X OLED Touch UX3405M Ultra 7 155H 32GB Intel Arc 120Hz","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/11/16/90601382-41cb-421a-8f62-690a53aec268.jpg.webp?ect=4g","price":"Rp18.259.000","rating":"5.0","sold":"16 terjual","link":"https://www.tokopedia.com/notebookgamingid/asus-zenbook-14x-oled-touch-ux3405m-ultra-7-155h-32gb-intel-arc-120hz-non-anti-gores-ultra-7-blue-82380?extParam=ivf%3Dfalse%26keyword%3Dintel+arc%26search_id%3D202412300424051A869164C8B3440174P2%26src%3Dsearch","store":{"name":"NOTEBOOK GAMING ID","location":"Jakarta Pusat","isOfficial":true}},{"title":"Lenovo IdeaPad Slim 5 Intel Core Ultra 5 125H Arc 16GB 512GB SSD 14\\" OLED","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/5/31/b735c717-963c-4305-b432-4ff76fd6e1e6.png.webp?ect=4g","price":"Rp11.599.000","rating":"5.0","sold":"100+ terjual","link":"https://www.tokopedia.com/distrilapid/lenovo-ideapad-slim-5-intel-core-ultra-5-125h-arc-16gb-512gb-ssd-14-oled-abyss-blue-non-bundle-3b352?extParam=ivf%3Dtrue%26keyword%3Dintel+arc%26search_id%3D202412300424051A869164C8B3440174P2%26src%3Dsearch","store":{"name":"Distributor Laptop ID","location":"Jakarta Pusat","isOfficial":true}},{"title":"MSI Claw A1M Intel Ultra 7-155H 16GB 7.0\\" FHD IPS 120Hz Intel Arc W11","image":"https://images.tokopedia.net/img/cache/200-square/VqbcmM/2024/1/13/f7357c6a-387e-4f3d-bcd2-6b1f075de6e5.jpg.webp?ect=4g","price":"Rp7.599.000","rating":"5.0","sold":"30+ terjual","link":"https://www.tokopedia.com/collinsofficial/msi-claw-a1m-intel-ultra-7-155h-16gb-7-0-fhd-ips-120hz-intel-arc-w11-ssd-512gb-e9ebc?extParam=ivf%3Dfalse%26keyword%3Dintel+arc%26search_id%3D202412300424051A869164C8B3440174P2%26src%3Dsearch","store":{"name":"Collins Official","location":"Jakarta Pusat","isOfficial":true}}]}}',
       },
     ],
   },
   {
-    id: "fgsdesvs",
+    id: "SIHGx7S8yVYYY1Jh",
     role: "assistant",
     content:
-      "# Key Points\n- **Intel ARC A750 Limited Edition**: Offers 8GB GDDR6 memory, suitable for high-end gaming with a price of Rp4,097,380. It's a good choice for those looking for performance without breaking the bank.\n- **ASROCK Intel ARC A380**: Available in different configurations, with prices ranging from Rp1,990,000 to Rp2,085,000. These are budget-friendly options for entry-level gaming or general use.\n- **ASROCK Intel ARC A580**: Priced at Rp2,990,000, it provides a middle ground with 8GB GDDR6, offering better performance than the A380 models.\n- **ASROCK Intel ARC A770**: The top-tier option with 16GB GDDR6, priced at Rp6,020,000, ideal for enthusiasts and those needing maximum performance.\n\n# Value Considerations\n- **A750 Limited Edition**: At Rp4,097,380, it provides a strong balance between cost and performance, making it a value pick for gamers looking for a step up from entry-level cards.\n- **A380 Series**: These cards offer good value for budget-conscious buyers, with prices under Rp2,100,000. They are suitable for light gaming or as an upgrade for older systems.\n- **A580**: For around Rp3,000,000, you get a significant performance boost over the A380 models, making it a smart choice for those wanting more power without the high cost of the A770.\n- **A770**: While expensive at Rp6,020,000, it's the best choice for those who need top-tier performance, especially for 4K gaming or professional applications.\n\n# Recommendations\n- **For Budget Buyers**: The ASROCK Intel ARC A380 models are your best bet. They offer decent performance for casual gaming or general computing tasks at a very reasonable price.\n- **For Mid-Range Gamers**: The ASROCK Intel ARC A580 provides a good mix of performance and price. It's suitable for gamers who want to play at higher settings without spending too much.\n- **For High-End Gamers**: If you're looking for the best performance and can afford it, the ASROCK Intel ARC A770 with 16GB GDDR6 is the way to go. It's perfect for 4K gaming, VR, and other demanding applications.\n- **For Compact Builds**: The ASROCK Intel ARC A380 LP (Low Profile) is ideal for small form factor PCs or HTPCs where space is at a premium.\n\nRemember, all these cards come from reputable sellers with high ratings, ensuring good service and reliability. Consider your specific needs, budget, and the size of your PC case when making your choice.",
-  },
-  {
-    id: "hfycbdr",
-    role: "user",
-    content:
-      "Each developer should have the same goal. The code base of each project should be easily extendable. Means, new feature should be easily added, bugs fixes should not create other bugs and each developer should exactly know how to achieve this. In other words, projects must be easily maintainable and features should be addable in a manageable amount of time.",
-  },
-  {
-    id: "waweadcd2",
-    role: "assistant",
-    content: "I am sorry, I cannot access external links.\n",
-  },
-  {
-    id: "asedas45df",
-    role: "user",
-    content: "Intel Arc A770 ray tracing performance analysis and comparisons",
-  },
-  {
-    id: "ohbj5653",
-    role: "assistant",
-    content:
-      "I am sorry, I cannot fulfill that request. I lack the ability to browse the internet and gather the information.\n",
+      "# Key Points\n- **ASRock Intel Arc A750**: A budget-friendly graphics card with 8GB VRAM, suitable for gaming and content creation at a lower cost.\n- **Lenovo Yoga Slim 7**: A premium laptop with an OLED touch screen, offering high-end performance for professionals and creatives.\n- **MSI Claw A1M**: A gaming handheld device with a high refresh rate screen, ideal for gamers on the go.\n- **Asus Zenbook 14X**: A top-tier laptop with a 120Hz OLED touch screen, perfect for those needing the best display quality and performance.\n- **Lenovo IdeaPad Slim 5**: A versatile laptop with an OLED screen, good for both work and entertainment, at a more accessible price point.\n\n# Value Considerations\n- **ASRock Intel Arc A750**: Offers good value for budget-conscious gamers or creators looking for a dedicated GPU without breaking the bank.\n- **Lenovo Yoga Slim 7**: Priced higher but provides a premium experience with its OLED screen and powerful internals, justifying the cost for those who need top-tier performance.\n- **MSI Claw A1M**: A specialized device for gaming, its price reflects its niche market, offering a unique portable gaming experience.\n- **Asus Zenbook 14X**: The highest price point, but it's packed with features like a high refresh rate OLED screen and substantial RAM, making it a luxury choice.\n- **Lenovo IdeaPad Slim 5**: Balances performance and price, offering OLED screen quality at a more reasonable cost compared to the Yoga Slim 7.\n\n# Recommendations\n- **For Budget Gamers or Creators**: The **ASRock Intel Arc A750** is your best bet. It provides decent performance for its price, especially if you're looking to upgrade your PC without spending too much.\n  \n- **For Professionals and Creatives**: If you need a laptop for high-end work, the **Lenovo Yoga Slim 7** or **Asus Zenbook 14X** are excellent choices. The Yoga Slim 7 offers a balance of performance and portability, while the Zenbook provides the best screen quality and performance for those who can afford it.\n\n- **For Gamers on the Go**: The **MSI Claw A1M** is the go-to device. Its high refresh rate screen and powerful internals make it ideal for gaming anywhere.\n\n- **For General Use with a Premium Touch**: The **Lenovo IdeaPad Slim 5** is a great middle ground. It offers an OLED screen for better visuals at a price that's not as steep as the Yoga Slim 7 or Zenbook.\n\n- **Considerations**: \n  - **Seller Reputation**: All products are from reputable sellers, with official stores offering additional peace of mind.\n  - **Performance and Reliability**: Higher-priced models generally offer better performance and reliability, but the ASRock card is a reliable choice for its price range.\n  - **Potential Concerns**: Ensure compatibility with your existing hardware for the ASRock card, and consider the need for a high refresh rate screen if opting for the MSI Claw A1M.",
   },
 ];
 
@@ -79,9 +57,7 @@ export default function Page() {
             <ChatMessages ui={uiState} />
           </div>
         </div>
-        F
       </AppStateProvider>
-      F
     </AI>
   );
 }

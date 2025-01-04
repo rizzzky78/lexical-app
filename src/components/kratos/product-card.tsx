@@ -9,6 +9,8 @@ import {
   BadgeDollarSign,
   Package,
   CircleArrowRight,
+  Copy,
+  CopyCheck,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,6 +25,8 @@ import { AI } from "@/app/(server-action)/action-single";
 import { useState, ReactNode, useId } from "react";
 import { Message } from "./testing/message";
 import { generateId } from "ai";
+import { UserMessage } from "./user-message";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Partial<Product>;
@@ -34,9 +38,21 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
   const { sendMessage } = useActions<typeof AI>();
   const [uiState, setUIState] = useUIState<typeof AI>();
 
-  const [messages, setMessages] = useState<ReactNode[]>([]);
+  const [copied, setCopied] = useState(false);
 
-  const id = useId();
+  const componentId = useId();
+
+  const copyToClipboard = (contentText: string) => {
+    toast("Link Copied Successfully!", {
+      position: "top-center",
+      richColors: true,
+      className:
+        "text-xs flex justify-center rounded-3xl border-none text-white dark:text-black bg-[#1A1A1D] dark:bg-white",
+    });
+    navigator.clipboard.writeText(contentText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleActionSubmit = async (action: string) => {
     setIsGenerating(true);
@@ -45,11 +61,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
       ...messages,
       {
         id: generateId(),
-        display: (
-          <Message key={messages.length} role="user">
-            {action}
-          </Message>
-        ),
+        display: <UserMessage key={componentId} content={action} />,
       },
     ]);
 
@@ -89,7 +101,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
       variants={cardVariants}
       whileHover="hover"
     >
-      <Card className="overflow-hidden border border-[#1A1A1D] bg-[#1A1A1D] text-green-50 h-full flex flex-col rounded-xl">
+      <Card className="overflow-hidden border border-[#1A1A1D] bg-[#1A1A1D] text-green-50 h-full flex flex-col rounded-3xl">
         <CardContent className="p-0 flex-grow relative">
           {image && (
             <Image
@@ -101,7 +113,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
             />
           )}
           <motion.div
-            className="absolute top-2 right-2 bg-black p-1 rounded-lg"
+            className="absolute top-2 right-2 bg-[#1A1A1D] p-1 rounded-lg"
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
@@ -120,7 +132,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
                     {title || "Untitled Product"}
                   </h3>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="rounded-3xl">
                   <p className="max-w-sm font-semibold">{title}</p>
                 </TooltipContent>
               </Tooltip>
@@ -153,32 +165,65 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
             </div>
           </div>
           <div className="px-2 space-x-2 pb-3 flex *:text-xs items-center justify-between pt-2">
-            <Button
-              className="relative ml-2 h-7 w-full overflow-hidden rounded-lg px-6 font-bold bg-gray-300 text-black shadow-sm transition-all duration-300 hover:bg-blue-200 hover:text-indigo-900"
-              onClick={async () => await handleActionSubmit(link!)}
-              disabled={isGenerating}
-            >
-              <span className="relative z-10">Ask AI</span>
-              <div
-                className="absolute inset-0 flex items-center justify-center"
-                aria-hidden="true"
-              >
-                <div className="gradient-bg bg-gradient-to-r from-pink-600 via-purple-500 to-cyan-400 rounded-full w-40 h-40 blur-xl opacity-50 animate-spin-slow transition-all duration-300" />
-              </div>
-            </Button>
             <TooltipProvider>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                  <Link
-                    href={link || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex rounded-full h-7 pr-2 items-center"
+                  <Button
+                    className="relative ml-2 h-7 w-full overflow-hidden rounded-3xl px-6 font-bold bg-gray-300 text-black shadow-sm transition-all duration-300 hover:bg-blue-200 hover:text-indigo-900"
+                    onClick={async () => await handleActionSubmit(link!)}
+                    disabled={isGenerating}
                   >
-                    <CircleArrowRight className="text-purple-200 h-7 w-7" />
-                  </Link>
+                    <span className="relative z-7">Ask AI</span>
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      aria-hidden="true"
+                    >
+                      <div className="gradient-bg bg-gradient-to-r from-pink-600 via-purple-500 to-cyan-400 rounded-full w-40 h-40 blur-xl opacity-50 animate-spin-slow transition-all duration-300" />
+                    </div>
+                  </Button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="rounded-3xl">
+                  <p className="max-w-sm font-semibold">Ask AI for product details</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <div
+                    className="flex rounded-full w-fit items-center cursor-pointer"
+                    onClick={() => copyToClipboard(link || "undefined")}
+                  >
+                    {copied ? (
+                      <CopyCheck className="text-purple-200 h-5 w-5" />
+                    ) : (
+                      <Copy className="text-purple-200 h-5 w-5" />
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="rounded-3xl mb-1">
+                  <p className="max-w-sm font-semibold">Copy product link</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <div
+                    className="flex rounded-full items-center pr-2"
+                    onClick={() => copyToClipboard(link || "undefined")}
+                  >
+                    <Link
+                      href={link || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className=""
+                    >
+                      <CircleArrowRight className="text-purple-200 h-5 w-5" />
+                    </Link>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="rounded-3xl mb-1">
                   <p className="max-w-sm font-semibold">Go to product page</p>
                 </TooltipContent>
               </Tooltip>

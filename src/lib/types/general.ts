@@ -10,8 +10,8 @@ export type Product = {
   title: string;
   image: string;
   price: string;
-  rating: string;
-  sold: string;
+  rating: string | null;
+  sold: string | null;
   link: string;
   store: Store;
 };

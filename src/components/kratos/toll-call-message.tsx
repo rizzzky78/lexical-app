@@ -8,7 +8,7 @@ export function ToolCallMessage({ data }: ToolCallProps) {
   return (
     <div>
       <div>
-        <h2>{data.toolName}</h2>
+        <h2>{data.toolName}XX</h2>
         <div>
           <pre className="text-xs">{JSON.stringify(data, null, 2)}</pre>
         </div>

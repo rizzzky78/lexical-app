@@ -1,8 +1,4 @@
 import {
-  Message,
-  TextStreamMessage,
-} from "@/components/kratos/testing/message";
-import {
   SYSTEM_INSTRUCT_INSIGHT,
   SYSTEM_INSTRUCT_PRODUCTS,
   SYSTEM_INSTRUCT_RELATED,
@@ -37,6 +33,8 @@ import {
 } from "@/lib/agents/action/server-action-handler";
 import { mapUIState } from "@/lib/agents/action/map-ui-state";
 import { productSchema } from "@/lib/agents/schema/product-schema";
+import { SectionToolResult } from "@/components/kratos/section-tool-result";
+import { StreamAssistantMessage } from "@/components/kratos/assistant-message";
 
 const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
   "use server";
@@ -61,7 +59,9 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
 
   const streamableText = createStreamableValue<string>("");
 
-  const assistantMessage = <TextStreamMessage content={streamableText.value} />;
+  const assistantMessage = (
+    <StreamAssistantMessage content={streamableText.value} />
+  );
 
   const { value, stream } = await streamUI({
     model: google("gemini-2.0-flash-exp"),
@@ -95,13 +95,7 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
         generate: async function* ({ query }) {
           let finalizedResults: ProductsResponse = { data: [] };
 
-          const uiStream = createStreamableUI(
-            <div>
-              <div>
-                <h2>Searching for {query}</h2>
-              </div>
-            </div>
-          );
+          const uiStream = createStreamableUI();
 
           const encodedQuery = encodeURIComponent(
             query.replace(/\s+/g, "+")
@@ -138,6 +132,7 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
                 </div>
               </div>
             );
+            const ss = scrapeContent.screenshot
 
             yield uiStream.value;
 
@@ -149,12 +144,12 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
             const streamableObject = createStreamableValue<any>();
 
             uiStream.update(
-              <Message role={"assistant"}>
+              <SectionToolResult args={{ query }}>
                 <ProductCardContainer
                   content={{ data: [] }}
                   isFinished={false}
                 />
-              </Message>
+              </SectionToolResult>
             );
 
             yield uiStream.value;
@@ -180,17 +175,19 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
           }
 
           uiStream.update(
-            <Message role={"assistant"}>
+            <SectionToolResult args={{ query }}>
               <ProductCardContainer
                 content={finalizedResults}
                 isFinished={true}
               />
-            </Message>
+            </SectionToolResult>
           );
 
           const streamableText = createStreamableValue<string>("");
 
-          uiStream.append(<TextStreamMessage content={streamableText.value} />);
+          uiStream.append(
+            <StreamAssistantMessage content={streamableText.value} />
+          );
 
           yield uiStream.value;
 
@@ -214,7 +211,7 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
 
           const { mutate } = mutateTool({
             name: "searchProduct",
-            args: query,
+            args: { query },
             result: finalizedResults,
             overrideAssistant: {
               content: finalizedText,
@@ -229,9 +226,7 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
           const streamableRelated = createStreamableValue<PartialRelated>();
 
           uiStream.append(
-            <Message role={"assistant"}>
-              <RelatedMessage relatedQueries={streamableRelated.value} />
-            </Message>
+            <RelatedMessage relatedQueries={streamableRelated.value} />
           );
 
           yield uiStream.value;

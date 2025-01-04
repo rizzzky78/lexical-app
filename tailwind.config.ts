@@ -68,6 +68,13 @@ export default {
       },
       animation: {
         "spin-slow": "spin 3s linear infinite",
+        shine: "shine 5s linear infinite",
+      },
+      keyframes: {
+        shine: {
+          "0%": { "background-position": "100%" },
+          "100%": { "background-position": "-100%" },
+        },
       },
     },
   },

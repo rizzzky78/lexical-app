@@ -5,10 +5,16 @@ import { FileMessage } from "@/components/kratos/file-message";
 import { ImageMessage } from "@/components/kratos/image-message";
 import { ToolCallMessage } from "@/components/kratos/toll-call-message";
 import { ProductCardContainer } from "@/components/kratos/product-card-container";
-import { AIState, MessageProperty, UIState } from "@/lib/types/ai";
+import {
+  AIState,
+  MessageProperty,
+  UIState,
+  AvailableTool,
+  ExtendedToolResult,
+} from "@/lib/types/ai";
 import { ToolCallPart, ToolContent } from "ai";
-import { AvailableTool } from "./server-action-handler";
 import { ProductsResponse } from "@/lib/types/general";
+import { SectionToolResult } from "@/components/kratos/section-tool-result";
 
 // Core message content types based on the existing system
 type MessageContent = {
@@ -32,11 +38,20 @@ const generateUniqueId = (baseId: string, index: number): string =>
 
 // Type-safe handler for tool results
 const handleProductSearch = (result: string, id: string): UIStateItem => {
-  const productsData: ProductsResponse = JSON.parse(result);
+  const resulted_searchProduct: ExtendedToolResult<
+    { args: string },
+    ProductsResponse
+  > = JSON.parse(result);
   return {
     id,
     display: (
-      <ProductCardContainer key={id} content={productsData} isFinished />
+      <SectionToolResult args={resulted_searchProduct.args}>
+        <ProductCardContainer
+          key={id}
+          content={resulted_searchProduct.data}
+          isFinished
+        />
+      </SectionToolResult>
     ),
   };
 };
@@ -46,25 +61,26 @@ const handleToolResult = (
   toolContent: MessageContent,
   id: string
 ): UIStateItem => {
-  if (!toolContent.toolName) {
-    throw new Error("Tool name is required for tool results");
-  }
-
   switch (toolContent.toolName) {
     case "searchProduct":
       return handleProductSearch(toolContent.result || "", id);
     default:
+      const resulted_default: ExtendedToolResult = JSON.parse(
+        toolContent.result || ""
+      );
       return {
         id,
         display: (
-          <div className="bg-green-200">
-            <div>
-              <h2>HANDLE TOOL-RESULT DISPLAY</h2>
-              <pre className="text-xs overflow-x-auto">
-                {JSON.stringify(toolContent, null, 2)}
-              </pre>
+          <SectionToolResult args={resulted_default}>
+            <div className="bg-green-200">
+              <div>
+                <h2>HANDLE TOOL-RESULT DISPLAY</h2>
+                <pre className="text-xs overflow-x-auto">
+                  {JSON.stringify(toolContent, null, 2)}
+                </pre>
+              </div>
             </div>
-          </div>
+          </SectionToolResult>
         ),
       };
   }

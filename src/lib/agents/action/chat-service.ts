@@ -59,7 +59,7 @@ export async function getChats(userId?: string | null) {
       });
 
     fs.writeFileSync(
-      "./state/user-chat.json",
+      "./src/debug/state/user-chat.json",
       JSON.stringify(userChat, null, 2)
     );
     console.log("user chats state saved!");

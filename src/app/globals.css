@@ -117,3 +117,20 @@
   animation: spin-slow 3s linear infinite;
 }
 
+.glass-text {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px 40px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.shine {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  transform: skew(-20deg);
+  pointer-events: none;
+}
