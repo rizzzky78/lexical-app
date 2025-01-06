@@ -14,6 +14,7 @@ const loadChats = cache(async (userId: string) => {
 const ChatPage: FC = async () => {
   const id = uuidv4();
   const session = await getServerSession();
+
   const chats = await loadChats(session?.user?.email || "anonymous");
 
   return (

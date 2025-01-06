@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import type { Config } from "tailwindcss";
 
 export default {
@@ -72,11 +73,21 @@ export default {
       },
       keyframes: {
         shine: {
-          "0%": { "background-position": "100%" },
-          "100%": { "background-position": "-100%" },
+          "0%": {
+            "background-position": "100%",
+          },
+          "100%": {
+            "background-position": "-100%",
+          },
         },
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  variants: {
+    scrollbar: ["rounded"], // Add `rounded` for rounded scrollbars
+  },
+  plugins: [
+    require("tailwindcss-animate"),
+    require("tailwind-scrollbar")({ nocompatible: true }),
+  ],
 } satisfies Config;

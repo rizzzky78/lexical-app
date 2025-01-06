@@ -35,6 +35,7 @@ import { mapUIState } from "@/lib/agents/action/map-ui-state";
 import { productSchema } from "@/lib/agents/schema/product-schema";
 import { SectionToolResult } from "@/components/kratos/section-tool-result";
 import { StreamAssistantMessage } from "@/components/kratos/assistant-message";
+import { groq } from "@ai-sdk/groq";
 
 const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
   "use server";
@@ -194,7 +195,7 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
           let finalizedText: string = "";
 
           const { textStream } = streamText({
-            model: xai("grok-beta"),
+            model: groq('llama-3.2-90b-vision-preview'),
             system: SYSTEM_INSTRUCT_INSIGHT,
             prompt: JSON.stringify(finalizedResults),
             onFinish: ({ text }) => {

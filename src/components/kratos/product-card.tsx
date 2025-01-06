@@ -20,13 +20,10 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
 import { useAppState } from "@/lib/utility/provider/app-state";
-import { useActions, useUIState } from "ai/rsc";
-import { AI } from "@/app/(server-action)/action-single";
-import { useState, ReactNode, useId } from "react";
-import { Message } from "./testing/message";
-import { generateId } from "ai";
-import { UserMessage } from "./user-message";
+import { useState, ReactNode } from "react";
 import { toast } from "sonner";
+import { useSetClipboard } from "@/lib/hooks/use-set-clipboard";
+
 
 interface ProductCardProps {
   product: Partial<Product>;
@@ -34,13 +31,10 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, isFinished }: ProductCardProps) {
-  const { isGenerating, setIsGenerating } = useAppState();
-  const { sendMessage } = useActions<typeof AI>();
-  const [uiState, setUIState] = useUIState<typeof AI>();
+  const { isGenerating } = useAppState();
+  const { setClipboard } = useSetClipboard();
 
   const [copied, setCopied] = useState(false);
-
-  const componentId = useId();
 
   const copyToClipboard = (contentText: string) => {
     toast("Link Copied Successfully!", {
@@ -54,25 +48,9 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleActionSubmit = async (action: string) => {
-    setIsGenerating(true);
-
-    setUIState((messages) => [
-      ...messages,
-      {
-        id: generateId(),
-        display: <UserMessage key={componentId} content={action} />,
-      },
-    ]);
-
-    const f = new FormData();
-    f.append("text_input", action);
-
-    const { id, display } = await sendMessage(f);
-
-    setUIState((messages) => [...messages, { id, display }]);
-
-    setIsGenerating(false);
+  const handleAttach = () => {
+    setClipboard("");
+    setClipboard(JSON.stringify({ title, link }));
   };
 
   const { title, image, price, rating, sold, link, store } = product;
@@ -101,7 +79,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
       variants={cardVariants}
       whileHover="hover"
     >
-      <Card className="overflow-hidden border border-[#1A1A1D] bg-[#1A1A1D] text-green-50 h-full flex flex-col rounded-3xl">
+      <Card className="overflow-hidden border rounded-3xl border-[#1A1A1D] bg-[#1A1A1D] text-green-50 h-full flex flex-col">
         <CardContent className="p-0 flex-grow relative">
           {image && (
             <Image
@@ -170,7 +148,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
                 <TooltipTrigger asChild>
                   <Button
                     className="relative ml-2 h-7 w-full overflow-hidden rounded-3xl px-6 font-bold bg-gray-300 text-black shadow-sm transition-all duration-300 hover:bg-blue-200 hover:text-indigo-900"
-                    onClick={async () => await handleActionSubmit(link!)}
+                    onClick={handleAttach}
                     disabled={isGenerating}
                   >
                     <span className="relative z-7">Ask AI</span>
@@ -183,7 +161,9 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="rounded-3xl">
-                  <p className="max-w-sm font-semibold">Ask AI for product details</p>
+                  <p className="max-w-sm font-semibold">
+                    Ask AI for product details
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -209,10 +189,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
             <TooltipProvider>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                  <div
-                    className="flex rounded-full items-center pr-2"
-                    onClick={() => copyToClipboard(link || "undefined")}
-                  >
+                  <div className="flex rounded-full items-center pr-2">
                     <Link
                       href={link || "#"}
                       target="_blank"

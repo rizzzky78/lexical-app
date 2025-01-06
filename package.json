@@ -57,6 +57,7 @@
     "remark-math": "^6.0.0",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
+    "tailwind-scrollbar": "^4.0.0-beta.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.0.3",
     "winston": "^3.17.0",

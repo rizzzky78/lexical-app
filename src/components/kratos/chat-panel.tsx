@@ -12,13 +12,17 @@ import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import {
   ChartNoAxesCombined,
+  ChevronDown,
+  ChevronUp,
   CircleArrowUp,
   ImageIcon,
+  Link,
+  Loader,
   Paperclip,
+  X,
 } from "lucide-react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Textarea } from "../ui/textarea";
-import { AttachTooltip } from "./attach-tooltip";
 import {
   Tooltip,
   TooltipContent,
@@ -26,11 +30,13 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Badge } from "../ui/badge";
+import { useSmartTextarea } from "@/lib/hooks/useSmartTextArea";
+import { useSetClipboard } from "@/lib/hooks/use-set-clipboard";
 
 interface ChatPanelProps {
-  messages: UIState;
+  uiState: UIState;
   query?: string;
-  isSidebarOpen: boolean;
 }
 
 const suggestedActions = [
@@ -52,9 +58,34 @@ const suggestedActions = [
   },
 ];
 
-export function ChatPanel({ messages, query, isSidebarOpen }: ChatPanelProps) {
+type PatternBadgeProps = {
+  pattern: { type: "url"; title: string; value: string; expanded: boolean };
+  onRemove: () => void;
+};
+
+function PatternBadge({ pattern, onRemove }: PatternBadgeProps) {
+  return (
+    <Badge
+      variant="secondary"
+      className="flex w-full justify-between items-center gap-2 py-2 pl-5 rounded-3xl mb-1"
+    >
+      <p className="line-clamp-1 text-xs">{pattern.title}</p>
+      <Button
+        variant={"ghost"}
+        className="rounded-full size-8"
+        onClick={onRemove}
+      >
+        <X className="size-4" />
+      </Button>
+    </Badge>
+  );
+}
+
+export function ChatPanel({ uiState, query }: ChatPanelProps) {
   //
-  const [input, setInput] = useState("");
+  // const [input, setInput] = useState("");
+  const { input, setInput, patterns, processInput, removePattern } =
+    useSmartTextarea();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -72,12 +103,19 @@ export function ChatPanel({ messages, query, isSidebarOpen }: ChatPanelProps) {
   };
   const [showEmptyScreen, setShowEmptyScreen] = useState<boolean>(false);
   //
-  const [uiState, setUIState] = useUIState<typeof AI>();
-  const [aiState, setAIState] = useAIState<typeof AI>();
+  const [_uiState, setUIState] = useUIState<typeof AI>();
+  const [_aiState, setAIState] = useAIState<typeof AI>();
   //
   const { isGenerating, setIsGenerating } = useAppState();
   //
   const { sendMessage } = useActions<typeof AI>();
+  const { clipboard, setClipboard } = useSetClipboard();
+  //
+
+  useEffect(() => {
+    if (clipboard && clipboard.length > 0) processInput(clipboard);
+  }, [clipboard, processInput]);
+
   //
   const router = useRouter();
   //
@@ -107,7 +145,7 @@ export function ChatPanel({ messages, query, isSidebarOpen }: ChatPanelProps) {
 
     setInput("");
     //
-    const { id, display } = await sendMessage(f);
+    const { id, display, stream } = await sendMessage(f);
     //
     setUIState((prevUI) => [...prevUI, { id, display }]);
 
@@ -138,13 +176,23 @@ export function ChatPanel({ messages, query, isSidebarOpen }: ChatPanelProps) {
 
   return (
     <div className="">
-      <div
-        className={cn(
-          "fixed -bottom-3 right-0 mx-auto flex flex-col items-center justify-end transition-all",
-          isSidebarOpen ? 'left-12' : 'left-[350px]'
-        )}
-      >
-        <div className="w-full px-3 md:px-0 lg:px-0 max-w-2xl flex flex-col bg-background pb-5 rounded-t-3xl">
+      <div className="fixed -bottom-4 w-full max-w-2xl">
+        <div className="w-full md:px-0 lg:px-0 max-w-[420px] lg:max-w-2xl flex flex-col pb-4 mb-0 rounded-t-3xl">
+          {patterns.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {patterns.map((pattern, idx) => (
+                <PatternBadge
+                  key={idx}
+                  pattern={pattern}
+                  onRemove={() => {
+                    removePattern(idx);
+                    setInput("");
+                    setClipboard("");
+                  }}
+                />
+              ))}
+            </div>
+          )}
           <form
             onSubmit={handleSubmit}
             className="relative w-full rounded-3xl bg-[#D8D2C2] dark:bg-muted flex flex-col px-2 p-2 h-full"
@@ -153,10 +201,16 @@ export function ChatPanel({ messages, query, isSidebarOpen }: ChatPanelProps) {
               <Textarea
                 ref={textareaRef}
                 name="text_input"
-                placeholder="What are you wanted to search for?"
+                placeholder={
+                  clipboard.length
+                    ? "What information you want get from this product?"
+                    : uiState.length
+                    ? "Reply an follow up question"
+                    : "What stuff are you wanted to search for?"
+                }
                 spellCheck={false}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => processInput(e.target.value)}
                 className="resize-none active:border-transparent w-full border-transparent focus:border-none hover:border-none text-sm overflow-hidden"
               />
             </ScrollArea>
@@ -217,7 +271,11 @@ export function ChatPanel({ messages, query, isSidebarOpen }: ChatPanelProps) {
                         className="cursor-pointer text-[#4A4947] dark:text-white rounded-full"
                         type={"submit"}
                       >
-                        <CircleArrowUp className="h-6 w-6" />
+                        {isGenerating ? (
+                          <Loader className="h-6 w-6 animate-spin" />
+                        ) : (
+                          <CircleArrowUp className="h-6 w-6" />
+                        )}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent className="rounded-3xl">
@@ -228,8 +286,8 @@ export function ChatPanel({ messages, query, isSidebarOpen }: ChatPanelProps) {
               </div>
             </div>
           </form>
-          <div className="pt-2 text-xs flex justify-center">
-            <h3 className="text-gray-200">
+          <div className="pt-7 pb-1 text-xs flex justify-center bg-background px-4 -z-10 relative -mt-6">
+            <h3 className="">
               This app can make mistakes, use with concern.
             </h3>
           </div>

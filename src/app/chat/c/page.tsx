@@ -22,6 +22,7 @@ export default async function Page({
   }
   const id = generateId();
   const session = await getServerSession();
+
   const chats = await loadChats(session?.user?.email || "anonymous");
 
   return (

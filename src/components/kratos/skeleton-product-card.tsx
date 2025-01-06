@@ -10,7 +10,7 @@ export function ProductCardSkeleton() {
       exit={{ opacity: 0 }}
     >
       <Card
-        className={`overflow-hidden border-[2px] border-[#3C3D37] bg-[#3C3D37] text-green-50 h-full flex flex-col rounded-xl`}
+        className={`overflow-hidden border-[2px] border-[#3C3D37] bg-[#3C3D37] text-green-50 h-full flex flex-col rounded-3xl`}
       >
         <CardContent className="p-0 flex-grow relative">
           <div className="w-full h-40 bg-gray-700 animate-pulse" />

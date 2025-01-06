@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 import { clearChats } from "@/lib/agents/action/chat-service";
 import { Trash2 } from "lucide-react";
+import { SidebarMenuButton } from "../ui/sidebar";
 
 type ClearHistoryProps = {
   empty: boolean;
@@ -28,14 +29,16 @@ export function ClearHistory({ empty }: ClearHistoryProps) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button
-          variant="outline"
-          size={"icon"}
-          className="w-full"
-          disabled={empty}
+        <SidebarMenuButton
+          tooltip={{
+            children: "Clear Chats",
+            hidden: false,
+            className: "rounded-3xl",
+          }}
+          className="px-2.5 md:px-2 text-red-200"
         >
           <Trash2 />
-        </Button>
+        </SidebarMenuButton>
       </AlertDialogTrigger>
       <div className="rounded-3xl">
         <AlertDialogContent>

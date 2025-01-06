@@ -5,6 +5,8 @@ import { Noto_Serif } from "next/font/google";
 import { ThemeProvider } from "@/components/provider/theme-provider";
 import { Header } from "@/components/kratos/essentials/header";
 import { Toaster } from "sonner";
+import { NextAuthSessionProvider } from "@/components/provider/session-provider";
+import { getServerSession } from "next-auth";
 
 const notoSerif = Noto_Serif({
   weight: "300",
@@ -25,11 +27,12 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession();
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -40,9 +43,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster />
-          {/* <Header /> */}
-          {children}
+          <NextAuthSessionProvider session={session}>
+            <Toaster />
+            {children}
+          </NextAuthSessionProvider>
         </ThemeProvider>
       </body>
     </html>
