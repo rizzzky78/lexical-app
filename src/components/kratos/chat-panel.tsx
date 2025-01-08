@@ -33,46 +33,28 @@ import { cn } from "@/lib/utils";
 import { Badge } from "../ui/badge";
 import { useSmartTextarea } from "@/lib/hooks/useSmartTextArea";
 import { useSetClipboard } from "@/lib/hooks/use-set-clipboard";
+import { useDebounceInput } from "@/lib/hooks/use-debounce-input";
 
 interface ChatPanelProps {
   uiState: UIState;
   query?: string;
 }
 
-const suggestedActions = [
-  { title: "View all", label: "my cameras", action: "View all my cameras" },
-  {
-    title: "Search for",
-    label: "Intel Arc GPU",
-    action: "search for intel arc",
-  },
-  {
-    title: "Search for",
-    label: "acer nitro 5",
-    action: "search for acer nitro 5",
-  },
-  {
-    title: "Search for",
-    label: "poco x6",
-    action: "search for poco x6",
-  },
-];
-
-type PatternBadgeProps = {
-  pattern: { type: "url"; title: string; value: string; expanded: boolean };
+type AttachBadgeProps = {
+  attach: { id: string | number; title: string; link: string };
   onRemove: () => void;
 };
 
-function PatternBadge({ pattern, onRemove }: PatternBadgeProps) {
+function AttachBadge({ attach, onRemove }: AttachBadgeProps) {
   return (
     <Badge
       variant="secondary"
-      className="flex w-full justify-between items-center gap-2 py-2 pl-5 rounded-3xl mb-1"
+      className="flex w-full justify-between items-center gap-2 py-2 pl-5 rounded-3xl mb-1 bg-[#D8D2C2] hover:bg-[#D8D2C2] dark:bg-[#343131] dark:hover:bg-[#343131]"
     >
-      <p className="line-clamp-1 text-xs">{pattern.title}</p>
+      <p className="line-clamp-1 text-xs font-normal">{attach.title}</p>
       <Button
         variant={"ghost"}
-        className="rounded-full size-8"
+        className="rounded-full size-8 hover:bg-muted"
         onClick={onRemove}
       >
         <X className="size-4" />
@@ -84,8 +66,8 @@ function PatternBadge({ pattern, onRemove }: PatternBadgeProps) {
 export function ChatPanel({ uiState, query }: ChatPanelProps) {
   //
   // const [input, setInput] = useState("");
-  const { input, setInput, patterns, processInput, removePattern } =
-    useSmartTextarea();
+  const { input, attachment, onChange, detach, flush } = useSmartTextarea();
+  const { value, isTyping, handleChange, handleBlur } = useDebounceInput();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -96,11 +78,8 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
         500
       )}px`;
     }
-  }, [input]);
+  }, [value]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-  };
   const [showEmptyScreen, setShowEmptyScreen] = useState<boolean>(false);
   //
   const [_uiState, setUIState] = useUIState<typeof AI>();
@@ -110,11 +89,10 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
   //
   const { sendMessage } = useActions<typeof AI>();
   const { clipboard, setClipboard } = useSetClipboard();
+  const [active, setActive] = useState(false);
   //
 
-  useEffect(() => {
-    if (clipboard && clipboard.length > 0) processInput(clipboard);
-  }, [clipboard, processInput]);
+  const [isRemoved, setIsRemoved] = useState(false);
 
   //
   const router = useRouter();
@@ -123,10 +101,17 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const handleRemove = () => {
+    detach();
+    setClipboard("");
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (isGenerating) return;
+
+    const f = new FormData();
 
     setIsGenerating(true);
 
@@ -134,70 +119,43 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
       ...prevUI,
       {
         id: generateId(),
-        display: <UserMessage key={componentId} content={input} />,
+        display: <UserMessage key={componentId} content={value} />,
       },
     ]);
 
-    const f = new FormData();
-    if (!f.has("text_input")) {
-      f.set("text_input", input);
+    if (attachment.meta) {
+      f.set("attach_link", JSON.stringify(attachment));
     }
 
-    setInput("");
-    //
-    const { id, display, stream } = await sendMessage(f);
-    //
+    if (!f.has("text_input")) {
+      f.set("text_input", value);
+    }
+
+    flush();
+
+    const { id, display } = await sendMessage(f);
+
     setUIState((prevUI) => [...prevUI, { id, display }]);
 
     setIsGenerating(false);
   };
 
-  const handleActionSubmit = async (action: string) => {
-    setIsGenerating(true);
-
-    setUIState((messages) => [
-      ...messages,
-      {
-        id: generateId(),
-        display: <UserMessage key={componentId} content={action} />,
-      },
-    ]);
-
-    const f = new FormData();
-
-    f.append("text_input", action);
-
-    const { id, display } = await sendMessage(f);
-
-    setUIState((messages) => [...messages, { id, display }]);
-
-    setIsGenerating(false);
-  };
+  const isButtonDisabled = isGenerating || value.length === 0;
 
   return (
     <div className="">
       <div className="fixed -bottom-4 w-full max-w-2xl">
         <div className="w-full md:px-0 lg:px-0 max-w-[420px] lg:max-w-2xl flex flex-col pb-4 mb-0 rounded-t-3xl">
-          {patterns.length > 0 && (
+          {attachment.meta && (
             <div className="flex flex-wrap gap-1">
-              {patterns.map((pattern, idx) => (
-                <PatternBadge
-                  key={idx}
-                  pattern={pattern}
-                  onRemove={() => {
-                    removePattern(idx);
-                    setInput("");
-                    setClipboard("");
-                  }}
-                />
-              ))}
+              <AttachBadge attach={attachment.meta} onRemove={handleRemove} />
             </div>
           )}
           <form
             onSubmit={handleSubmit}
-            className="relative w-full rounded-3xl bg-[#D8D2C2] dark:bg-muted flex flex-col px-2 p-2 h-full"
+            className="relative w-full rounded-3xl bg-purple-200 dark:bg-muted flex flex-col px-2 pt-2 h-full"
           >
-            <ScrollArea className="w-full rounded-3xl min-h-[40px] max-h-[500px] overflow-x-auto">
+            <ScrollArea className="w-full rounded-3xl max-h-[500px] overflow-x-auto">
               <Textarea
                 ref={textareaRef}
                 name="text_input"
@@ -208,13 +166,14 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
                     ? "Reply an follow up question"
                     : "What stuff are you wanted to search for?"
                 }
-                spellCheck={false}
-                value={input}
-                onChange={(e) => processInput(e.target.value)}
+                spellCheck={true}
+                value={value}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 className="resize-none active:border-transparent w-full border-transparent focus:border-none hover:border-none text-sm overflow-hidden"
               />
             </ScrollArea>
-            <div className="flex justify-between p-1">
+            <div className="flex justify-between px-1 pb-2 -mt-3">
               <div className="flex items-center *:hover:bg-transparent *:bg-transparent">
                 <TooltipProvider>
                   <Tooltip delayDuration={100}>
@@ -270,6 +229,7 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
                         size={"icon"}
                         className="cursor-pointer text-[#4A4947] dark:text-white rounded-full"
                         type={"submit"}
+                        disabled={isButtonDisabled}
                       >
                         {isGenerating ? (
                           <Loader className="h-6 w-6 animate-spin" />
@@ -286,10 +246,8 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
               </div>
             </div>
           </form>
-          <div className="pt-7 pb-1 text-xs flex justify-center bg-background px-4 -z-10 relative -mt-6">
-            <h3 className="">
-              This app can make mistakes, use with concern.
-            </h3>
+          <div className="pt-7 pb-1 text-xs flex justify-center bg-[#323232] text-white px-4 -z-10 relative -mt-6 rounded-b-3xl">
+            <h3 className="">This app can make mistakes, use with concern.</h3>
           </div>
         </div>
       </div>

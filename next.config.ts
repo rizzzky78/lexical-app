@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       {
         hostname: "images.unsplash.com",
       },
+      {
+        hostname: "service.firecrawl.dev",
+      },
     ],
   },
 };

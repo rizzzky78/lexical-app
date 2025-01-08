@@ -264,3 +264,216 @@
     null
   ]
 }
+[90m[2025-01-07 00:02:49.512][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 00:02:50.433][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 16:31:43.571][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 16:31:44.484][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 16:35:22.295][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 16:35:23.107][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 16:53:59.118][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 16:53:59.945][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 16:58:21.124][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 16:58:21.961][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 17:00:27.929][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 17:00:28.724][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 17:01:19.624][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 17:01:20.554][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 17:09:09.853][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 17:09:11.174][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 18:36:48.783][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 18:36:50.882][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 21:19:08.793][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 21:19:10.876][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "User chat saved successfully!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 21:20:19.849][39m [[1m[33mWARN[39m[22m] {
+  "ctx": "Scrape attempt 1 failed",
+  "meta": [
+    {
+      "url": "https://www.tokopedia.com/lenovolegion/lenovo-legion-go-amd-z1-extreme-16gb-512-ssd-8-8-qhd-144hz-win-11-1tb-ssd-c74b6?extParam=ivf%3Dtrue%26keyword%3Dlenovo+legion%26search_id%3D20250107141844C444B4622DDEDA3D4X61%26src%3Dsearch",
+      "error": "Failed to scrape URL. Status code: 500. Error: (Internal server error) - timeout",
+      "nextAttemptIn": 1000
+    }
+  ]
+}
+[90m[2025-01-07 21:20:51.137][39m [[1m[33mWARN[39m[22m] {
+  "ctx": "Scrape attempt 2 failed",
+  "meta": [
+    {
+      "url": "https://www.tokopedia.com/lenovolegion/lenovo-legion-go-amd-z1-extreme-16gb-512-ssd-8-8-qhd-144hz-win-11-1tb-ssd-c74b6?extParam=ivf%3Dtrue%26keyword%3Dlenovo+legion%26search_id%3D20250107141844C444B4622DDEDA3D4X61%26src%3Dsearch",
+      "error": "Failed to scrape URL. Status code: 500. Error: (Internal server error) - timeout",
+      "nextAttemptIn": 2000
+    }
+  ]
+}
+[90m[2025-01-07 21:21:23.446][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Firecrawl operation error",
+  "meta": [
+    {
+      "error": "Scrape operation failed",
+      "input": {
+        "action": "scrape",
+        "properties": {
+          "url": "https://www.tokopedia.com/lenovolegion/lenovo-legion-go-amd-z1-extreme-16gb-512-ssd-8-8-qhd-144hz-win-11-1tb-ssd-c74b6?extParam=ivf%3Dtrue%26keyword%3Dlenovo+legion%26search_id%3D20250107141844C444B4622DDEDA3D4X61%26src%3Dsearch",
+          "formats": [
+            "extract",
+            "screenshot"
+          ],
+          "usePrompt": true,
+          "systemPrompt": "You are professional data extractor",
+          "prompt": "Extract the product description with a full details"
+        }
+      }
+    }
+  ]
+}
+[90m[2025-01-07 23:34:20.977][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 23:34:22.194][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "User chat saved successfully!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 23:35:37.319][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "Executing tool: <getProductDetails>",
+  "meta": [
+    {
+      "query": ""
+    }
+  ]
+}
+[90m[2025-01-07 23:36:23.718][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-07 23:36:25.488][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-08 00:18:47.844][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "Executing tool: <getProductDetails>",
+  "meta": [
+    {
+      "query": ""
+    }
+  ]
+}
+[90m[2025-01-08 00:19:36.586][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-08 00:19:40.595][39m [[1m[31mERROR[39m[22m] {
+  "ctx": "Error when save the chat properties in <saveChat()>",
+  "meta": [
+    null
+  ]
+}

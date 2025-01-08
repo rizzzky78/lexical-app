@@ -60,7 +60,7 @@ export const ProductCardContainer: FC<ProductGridProps> = ({
   const renderProducts = () =>
     products.map((product, index) => (
       <motion.div key={`product-${index}`} variants={animations.item}>
-        <ProductCard product={product} isFinished={isFinished}  />
+        <ProductCard product={product} isFinished={isFinished} id={index} />
       </motion.div>
     ));
 

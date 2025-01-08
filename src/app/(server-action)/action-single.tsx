@@ -1,11 +1,13 @@
 import {
+  SYSTEM_INSTRUCT_DEFINED_INSIGHT,
+  SYSTEM_INSTRUCT_EXTRACTOR,
   SYSTEM_INSTRUCT_INSIGHT,
   SYSTEM_INSTRUCT_PRODUCTS,
   SYSTEM_INSTRUCT_RELATED,
 } from "@/lib/agents/system-instructions";
 import { scrapeUrl } from "@/lib/agents/tools/api/firecrawl";
 import { google } from "@ai-sdk/google";
-import { generateId, streamObject, streamText } from "ai";
+import { generateId, JSONValue, streamObject, streamText } from "ai";
 import {
   createAI,
   createStreamableUI,
@@ -36,11 +38,22 @@ import { productSchema } from "@/lib/agents/schema/product-schema";
 import { SectionToolResult } from "@/components/kratos/section-tool-result";
 import { StreamAssistantMessage } from "@/components/kratos/assistant-message";
 import { groq } from "@ai-sdk/groq";
+import { getServerSession } from "next-auth";
+import Image from "next/image";
+import { ObjectStreamMessage } from "@/components/kratos/testing/object";
+import logger from "@/lib/utility/logger/root";
 
 const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
   "use server";
 
-  const userMessage = f.get("text_input") as string;
+  const textInput = f.get("text_input") as string;
+
+  const attachLink = f.get("attach_link") as string | null;
+
+  const userMessage = JSON.stringify({
+    text_input: textInput,
+    attach_link: attachLink ?? null,
+  });
 
   console.log(`triggered server action - sendMessage, meta: ${userMessage}`);
 
@@ -123,19 +136,27 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
           yield uiStream.value;
 
           if (scrapeContent.success && scrapeContent.markdown) {
-            uiStream.update(
-              <div>
-                <h2>Extracting the raw data...</h2>
+            if (scrapeContent.screenshot) {
+              uiStream.append(
                 <div>
-                  <pre className="text-xs">
-                    {JSON.stringify(scrapeContent.metadata, null, 2)}
-                  </pre>
+                  <h2>Extracting the raw data...</h2>
+                  <div>
+                    <div>
+                      <Image
+                        src={scrapeContent.screenshot}
+                        alt={scrapeContent.metadata?.title || "Product"}
+                        fill
+                      />
+                    </div>
+                    <pre className="text-xs overflow-x-auto">
+                      {JSON.stringify(scrapeContent.metadata, null, 2)}
+                    </pre>
+                  </div>
                 </div>
-              </div>
-            );
-            const ss = scrapeContent.screenshot
+              );
 
-            yield uiStream.value;
+              yield uiStream.value;
+            }
 
             const payload = {
               objective: `Extract only product data including: product images, product link, and store link.`,
@@ -195,7 +216,7 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
           let finalizedText: string = "";
 
           const { textStream } = streamText({
-            model: groq('llama-3.2-90b-vision-preview'),
+            model: groq("llama-3.2-90b-vision-preview"),
             system: SYSTEM_INSTRUCT_INSIGHT,
             prompt: JSON.stringify(finalizedResults),
             onFinish: ({ text }) => {
@@ -262,6 +283,140 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
           return uiStream.value;
         },
       },
+      getProductDetails: {
+        description: `Get product details by given link or URL.`,
+        parameters: z.object({
+          link: z.string().describe("The given url or link by user"),
+          query: z
+            .string()
+            .describe(
+              "An additional query, this is used as a wayfinder such as searching for specific information. These queries adjust based on user input."
+            ),
+        }),
+        generate: async function* ({ link, query }) {
+          logger.info(`Executing tool: <getProductDetails>`, { query });
+
+          const uiStream = createStreamableUI();
+
+          uiStream.append(
+            <div>
+              <div>
+                <p>Proceed with Query: {link}</p>
+              </div>
+            </div>
+          );
+
+          yield uiStream.value;
+
+          const scrapeResult = await scrapeUrl({
+            url: link,
+            formats: ["markdown", "screenshot"],
+          });
+
+          if (scrapeResult.success && scrapeResult.markdown) {
+            if (scrapeResult.screenshot) {
+              uiStream.append(
+                <div>
+                  <div className="max-w-3xl max-h-[40rem]">
+                    <Image
+                      src={scrapeResult.screenshot}
+                      alt={scrapeResult.metadata?.title || "product"}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+              );
+
+              yield uiStream.value;
+            }
+
+            const payloadRequest = {
+              // query,
+              data: scrapeResult.markdown,
+            };
+
+            const streamableObject = createStreamableValue();
+
+            uiStream.append(
+              <div className="animate-pulse">
+                <ObjectStreamMessage content={streamableObject.value} />
+              </div>
+            );
+
+            yield uiStream.value;
+
+            const payloadContent = {
+              prompt: `Extract the product description with a full details. This also includes product ratings which include images and comments (if any) with a maximum of 5 product rating data (take the rating that is most helpful to the user).`,
+              data: scrapeResult.markdown,
+            };
+
+            let finalizedObject: JSONValue = {};
+
+            const { partialObjectStream } = streamObject({
+              model: google("gemini-2.0-flash-exp"),
+              system: SYSTEM_INSTRUCT_EXTRACTOR,
+              prompt: JSON.stringify(payloadContent),
+              output: "no-schema",
+              onFinish: async ({ object }) => {
+                finalizedObject = object as JSONValue;
+              },
+            });
+
+            for await (const objProduct of partialObjectStream) {
+              finalizedObject = objProduct;
+              streamableObject.update(finalizedObject);
+            }
+
+            streamableObject.done();
+
+            const streamableText = createStreamableValue<string>("");
+
+            uiStream.append(
+              <StreamAssistantMessage content={streamableText.value} />
+            );
+
+            yield uiStream.value;
+
+            let finalizedText: string = "";
+
+            const { textStream } = streamText({
+              model: google("gemini-2.0-flash-exp"),
+              system: SYSTEM_INSTRUCT_DEFINED_INSIGHT,
+              prompt: JSON.stringify(payloadRequest),
+              onFinish: async ({ text }) => {
+                finalizedText = text;
+              },
+            });
+
+            for await (const text of textStream) {
+              finalizedText += text;
+              streamableText.update(finalizedText);
+            }
+
+            streamableText.done();
+
+            const { mutate } = mutateTool({
+              name: "getProductDetails",
+              args: { link, query },
+              result: finalizedObject,
+              overrideAssistant: {
+                content: finalizedText,
+              },
+            });
+
+            aiState.done({
+              ...aiState.get(),
+              messages: [...aiState.get().messages, ...mutate],
+            });
+          }
+
+          // final
+          uiStream.done();
+
+          return uiStream.value;
+        },
+      },
     },
   });
 
@@ -287,7 +442,8 @@ export const AI = createAI<AIState, UIState, UseAction>({
 
     if (done) {
       _debugHelper("ai-state", state);
-      await handleSaveChat(state);
+      const session = await getServerSession();
+      await handleSaveChat(state, session);
     }
   },
   onGetUIState: async () => {

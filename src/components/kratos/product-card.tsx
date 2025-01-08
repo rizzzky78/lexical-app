@@ -22,17 +22,17 @@ import { Button } from "../ui/button";
 import { useAppState } from "@/lib/utility/provider/app-state";
 import { useState, ReactNode } from "react";
 import { toast } from "sonner";
-import { useSetClipboard } from "@/lib/hooks/use-set-clipboard";
-
+import { useSmartTextarea } from "@/lib/hooks/useSmartTextArea";
 
 interface ProductCardProps {
   product: Partial<Product>;
   isFinished?: boolean;
+  id?: number;
 }
 
-export function ProductCard({ product, isFinished }: ProductCardProps) {
+export function ProductCard({ product, isFinished, id }: ProductCardProps) {
   const { isGenerating } = useAppState();
-  const { setClipboard } = useSetClipboard();
+  const { attach, detach } = useSmartTextarea();
 
   const [copied, setCopied] = useState(false);
 
@@ -46,11 +46,6 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
     navigator.clipboard.writeText(contentText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleAttach = () => {
-    setClipboard("");
-    setClipboard(JSON.stringify({ title, link }));
   };
 
   const { title, image, price, rating, sold, link, store } = product;
@@ -71,6 +66,17 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
       scale: 1.02,
       transition: { duration: 0.2 },
     },
+  };
+
+  const handleAttach = (id: number | undefined) => {
+    detach();
+    attach({
+      meta: {
+        id: id ?? "default_id",
+        title: title ?? "no-value",
+        link: link ?? "no-value",
+      },
+    });
   };
 
   return (
@@ -96,11 +102,24 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <ShieldCheck
-              className={`w-5 h-5 ${
-                store?.isOfficial ? "text-green-500" : "text-gray-400"
-              }`}
-            />
+            <TooltipProvider>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <ShieldCheck
+                    className={`w-5 h-5 ${
+                      store?.isOfficial ? "text-green-500" : "text-gray-400"
+                    }`}
+                  />
+                </TooltipTrigger>
+                <TooltipContent className="rounded-3xl">
+                  <p className="max-w-sm font-semibold">
+                    {store?.isOfficial
+                      ? "Official/Trusted Store"
+                      : "Not Official/Trusted Store"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </motion.div>
           <div className="px-3 py-2 space-y-1 text-xs">
             <TooltipProvider>
@@ -148,7 +167,7 @@ export function ProductCard({ product, isFinished }: ProductCardProps) {
                 <TooltipTrigger asChild>
                   <Button
                     className="relative ml-2 h-7 w-full overflow-hidden rounded-3xl px-6 font-bold bg-gray-300 text-black shadow-sm transition-all duration-300 hover:bg-blue-200 hover:text-indigo-900"
-                    onClick={handleAttach}
+                    onClick={() => handleAttach(id)}
                     disabled={isGenerating}
                   >
                     <span className="relative z-7">Ask AI</span>

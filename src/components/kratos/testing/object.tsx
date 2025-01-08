@@ -18,7 +18,6 @@ export function ObjectStreamMessage({ content }: ObjectStreamMessageProps) {
   return (
     <div>
       <div>
-        <h2>Extracting RAW data from scrape data. Method: Stream</h2>
         <div>
           <pre className="text-xs overflow-x-auto">{JSON.stringify(streamData, null, 2)}</pre>
         </div>

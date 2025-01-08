@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { CoreMessage, generateId, generateText, TextPart } from "ai";
-import { getServerSession } from "next-auth";
+import { getServerSession, Session } from "next-auth";
 import { getChat, saveChat } from "./chat-service";
 import {
   AIState,
@@ -60,10 +60,12 @@ export const mutateTool = <A = unknown, D = unknown>(
   return { mutate: mutationToolCall };
 };
 
-export const handleSaveChat = async (state: AIState) => {
+export const handleSaveChat = async (
+  state: AIState,
+  session: Session | null
+) => {
   const { chatId, messages } = state;
 
-  const session = await getServerSession();
   const userId = session?.user?.email || "anonymous";
 
   let chatTitle: string = "";
@@ -93,13 +95,17 @@ export const handleSaveChat = async (state: AIState) => {
     }
   }
 
-  await saveChat(userId, {
+  const savePayload = {
     chatId,
     userId,
     created: new Date(),
     title: chatTitle,
     messages,
-  });
+  };
+
+  // console.log(JSON.stringify(savePayload, null, 2));
+
+  await saveChat(userId, savePayload);
 };
 
 export const toCoreMessage = (m: MessageProperty[]): CoreMessage[] => {

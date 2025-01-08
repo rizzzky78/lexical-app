@@ -183,7 +183,7 @@ export const PureMarkdown: FC<MarkdownProps> = ({ children, className }) => {
 
           return (
             <TooltipProvider>
-              <Tooltip>
+              <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <a
                     href={href}
@@ -195,8 +195,11 @@ export const PureMarkdown: FC<MarkdownProps> = ({ children, className }) => {
                     <SquareArrowOutUpRight className="h-3 w-3" />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="bg-gray-800 px-3 py-1.5">
-                  {href}
+                <TooltipContent
+                  side="top"
+                  className="rounded-3xl max-w-[340px] pl-5"
+                >
+                  <p className="line-clamp-1">{href}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

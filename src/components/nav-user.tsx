@@ -1,12 +1,15 @@
 "use client";
 
 import {
+  AppWindow,
   BadgeCheck,
   Bell,
   ChevronsUpDown,
   CreditCard,
   Fingerprint,
+  HistoryIcon,
   LogOut,
+  SquareCode,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -79,18 +82,17 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup className="*:rounded-3xl *:text-xs *:cursor-pointer">
-              <DropdownMenuItem>Hello</DropdownMenuItem>
               <DropdownMenuItem>
-                <BadgeCheck />
-                Account
+                <AppWindow />
+                User Dashboard
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <CreditCard />
-                Billing
+                <HistoryIcon />
+                My Chat History
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Bell />
-                Notifications
+                <SquareCode />
+                View Portfolio of creator App
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => signOut({ callbackUrl: "/login" })}

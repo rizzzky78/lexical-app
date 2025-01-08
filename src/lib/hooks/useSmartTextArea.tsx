@@ -1,41 +1,58 @@
-'use client'
+"use client";
 
-import { useState, useCallback } from "react";
+import { ChangeEvent } from "react";
+import { create } from "zustand";
 
-type RecognizedPattern = {
-  type: "url";
-  title: string;
-  value: string;
-  expanded: boolean;
+type Attachment = {
+  meta: {
+    id: string | number;
+    title: string;
+    link: string;
+  };
 };
 
-export function useSmartTextarea() {
-  const [input, setInput] = useState("");
-  const [patterns, setPatterns] = useState<RecognizedPattern[]>([]);
-
-  const processInput = useCallback((text: string) => {
-    try {
-      const jsonData = JSON.parse(text);
-      if (jsonData.title && jsonData.link) {
-        setPatterns([
-          {
-            type: "url",
-            title: jsonData.title,
-            value: jsonData.link,
-            expanded: false,
-          },
-        ]);
-        setInput("");
-      }
-    } catch (e) {
-      // If it's not valid JSON, keep the original text
-      setInput(text);
-    }
-  }, []);
-
-  const removePattern = useCallback((index: number) => {
-    setPatterns((prevPatterns) => prevPatterns.filter((_, i) => i !== index));
-  }, []);
-
-  return { input, patterns, processInput, removePattern, setInput };
+interface SmartTextareaState {
+  /**
+   * The text area regular input
+   */
+  input: string;
+  /**
+   * Change Event from TextArea Element
+   * @param input
+   */
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  /**
+   * Attached Value
+   */
+  attachment: Partial<Attachment>;
+  /**
+   * Attach an serializable object
+   * @param object
+   * @returns
+   */
+  attach: (object: Partial<Attachment>) => void;
+  /**
+   * Detach or remove value of `attachment`
+   */
+  detach: () => void;
+  /**
+   * Flush or Reset value for both of `input` and `attachment`
+   */
+  flush: () => void;
 }
+
+/**
+ * Use Smart TextArea Hook
+ *
+ * This hook should be used on component of:
+ * - who need to maintain/change state in different component or pages
+ * - to get state data in anywhere as well as in client component
+ */
+export const useSmartTextarea = create<SmartTextareaState>((set) => ({
+  input: "",
+  attachment: {},
+  onChange: (e) => set({ input: e.target.value }),
+  attach: (value) => set({ attachment: value }),
+  detach: () => set({ attachment: {} }),
+  flush: () => set({ input: "", attachment: {} }),
+}));
