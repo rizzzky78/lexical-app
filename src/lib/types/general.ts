@@ -18,6 +18,7 @@ export type Product = {
 
 export type ProductsResponse = {
   data: Product[];
+  screenshot?: string;
 };
 
 export type PartialProductsResponse = DeepPartial<ProductsResponse>;

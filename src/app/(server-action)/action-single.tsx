@@ -183,7 +183,10 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
               schema: productSchema,
               onFinish: async ({ object }) => {
                 if (object) {
-                  finalizedResults = object;
+                  finalizedResults = {
+                    screenshot: scrapeContent.screenshot,
+                    data: object.data,
+                  };
                 }
               },
             });

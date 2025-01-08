@@ -67,7 +67,8 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
   //
   // const [input, setInput] = useState("");
   const { input, attachment, onChange, detach, flush } = useSmartTextarea();
-  const { value, isTyping, handleChange, handleBlur } = useDebounceInput();
+  const { value, isTyping, handleChange, handleBlur, handleReset } =
+    useDebounceInput();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -132,6 +133,7 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
     }
 
     flush();
+    handleReset();
 
     const { id, display } = await sendMessage(f);
 
@@ -144,7 +146,7 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
 
   return (
     <div className="">
-      <div className="fixed -bottom-4 w-full max-w-2xl">
+      <div className="fixed -bottom-4 w-full max-w-2xl z-20">
         <div className="w-full md:px-0 lg:px-0 max-w-[420px] lg:max-w-2xl flex flex-col pb-4 mb-0 rounded-t-3xl">
           {attachment.meta && (
             <div className="flex flex-wrap gap-1">

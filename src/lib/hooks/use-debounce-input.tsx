@@ -30,6 +30,7 @@ interface DebouncedValue {
   handleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   /** Handler for textarea blur events */
   handleBlur: () => void;
+  handleReset: () => void;
 }
 
 /**
@@ -95,11 +96,16 @@ export function useDebounceInput({
     []
   );
 
+  const handleReset = useCallback(() => {
+    setValue("");
+  }, []);
+
   return {
     value,
     debouncedValue,
     isTyping,
     handleChange,
     handleBlur,
+    handleReset,
   };
 }

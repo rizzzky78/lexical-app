@@ -45,13 +45,11 @@ const handleProductSearch = (result: string, id: string): UIStateItem => {
   return {
     id,
     display: (
-      <SectionToolResult args={resulted_searchProduct.args}>
-        <ProductCardContainer
-          key={id}
-          content={resulted_searchProduct.data}
-          isFinished
-        />
-      </SectionToolResult>
+      <ProductCardContainer
+        key={id}
+        content={resulted_searchProduct.data}
+        isFinished
+      />
     ),
   };
 };

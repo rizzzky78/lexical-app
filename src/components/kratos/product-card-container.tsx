@@ -5,6 +5,8 @@ import { FC, useEffect, useState } from "react";
 import { ProductCard } from "./product-card";
 import { motion } from "framer-motion";
 import { ProductCardSkeleton } from "./skeleton-product-card";
+import Image from "next/image";
+import { Lens } from "../ui/lens";
 
 // Animation configurations
 const ANIMATION_CONSTANTS = {
@@ -40,6 +42,7 @@ export const ProductCardContainer: FC<ProductGridProps> = ({
   isFinished,
 }) => {
   const [isContentReady, setIsContentReady] = useState(false);
+  const [hovering, setHovering] = useState(false);
   const products = content.data;
 
   useEffect(() => {
@@ -65,13 +68,33 @@ export const ProductCardContainer: FC<ProductGridProps> = ({
     ));
 
   return (
-    <motion.div
-      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2"
-      variants={animations.container}
-      initial="hidden"
-      animate="visible"
-    >
-      {isContentReady && isFinished ? renderProducts() : renderSkeletons()}
-    </motion.div>
+    <div>
+      {content.screenshot && (
+        <div className="pb-10 pt-5">
+          <Lens
+            hovering={hovering}
+            setHovering={setHovering}
+            zoomFactor={2}
+            lensSize={270}
+          >
+            <Image
+              src={content.screenshot}
+              alt={"Search Product"}
+              width={"768"}
+              height={"576"}
+              quality={100}
+            />
+          </Lens>
+        </div>
+      )}
+      <motion.div
+        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2"
+        variants={animations.container}
+        initial="hidden"
+        animate="visible"
+      >
+        {isContentReady && isFinished ? renderProducts() : renderSkeletons()}
+      </motion.div>
+    </div>
   );
 };

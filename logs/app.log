@@ -477,3 +477,15 @@
     null
   ]
 }
+[90m[2025-01-08 22:40:51.021][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "DEBUG: <ai-state> saved!",
+  "meta": [
+    null
+  ]
+}
+[90m[2025-01-08 22:40:53.157][39m [[1m[34mINFO[39m[22m] {
+  "ctx": "User chat saved successfully!",
+  "meta": [
+    null
+  ]
+}
