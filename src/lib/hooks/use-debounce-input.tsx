@@ -27,7 +27,7 @@ interface DebouncedValue {
   /** Indicates whether the user is currently typing */
   isTyping: boolean;
   /** Handler for textarea change events */
-  handleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleChange: (input: string) => void;
   /** Handler for textarea blur events */
   handleBlur: () => void;
   handleReset: () => void;
@@ -89,12 +89,9 @@ export function useDebounceInput({
   }, [value, onTypingFinish]);
 
   // Handle input change
-  const handleChange = useCallback(
-    (event: ChangeEvent<HTMLTextAreaElement>) => {
-      setValue(event.target.value);
-    },
-    []
-  );
+  const handleChange = useCallback((input: string) => {
+    setValue(input);
+  }, []);
 
   const handleReset = useCallback(() => {
     setValue("");

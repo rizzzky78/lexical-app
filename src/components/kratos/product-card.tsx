@@ -32,7 +32,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, isFinished, id }: ProductCardProps) {
   const { isGenerating } = useAppState();
-  const { attach, detach } = useSmartTextarea();
+  const { attach, detach, setInput } = useSmartTextarea();
 
   const [copied, setCopied] = useState(false);
 
@@ -69,6 +69,7 @@ export function ProductCard({ product, isFinished, id }: ProductCardProps) {
   };
 
   const handleAttach = (id: number | undefined) => {
+    setInput("I want you to give me the product details or information");
     detach();
     attach({
       meta: {

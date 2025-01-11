@@ -30,7 +30,6 @@ type ChatProps = {
 export function Chat({ id, query, session, chats }: ChatProps) {
   const path = usePathname();
   const [uiMessage] = useUIState<typeof AI>();
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
   const { setTheme, resolvedTheme } = useTheme();
 
@@ -46,9 +45,6 @@ export function Chat({ id, query, session, chats }: ChatProps) {
 
   const selectedChat = chats.find((chat) => chat.chatId === id);
 
-  const handleSidebarOpen = () => {
-    setIsSidebarOpen((prev) => !prev);
-  };
 
   return (
     <SidebarProvider
@@ -63,7 +59,7 @@ export function Chat({ id, query, session, chats }: ChatProps) {
       <SidebarInset className="rounded-none">
         <header className="rounded-t-xl justify-between sticky z-20 top-0 flex shrink-0 items-center bg-background/80 backdrop-blur-sm py-1 px-2">
           <div className="flex items-center">
-            <SidebarTrigger onClick={handleSidebarOpen} className="-ml-1" />
+            <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-8" />
             <div>
               <p className="text-sm">

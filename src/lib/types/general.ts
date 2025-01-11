@@ -1,4 +1,5 @@
-import { DeepPartial } from "ai";
+import { DeepPartial, JSONValue } from "ai";
+import { PartialProductInsightDescription } from "../agents/schema/product-insight";
 
 export type Store = {
   name: string;
@@ -30,3 +31,10 @@ export type Related = {
 };
 
 export type PartialRelated = DeepPartial<Related>;
+
+export type ProductInsight = {
+  data: PartialProductInsightDescription;
+  screenshot?: string;
+};
+
+export type PartialProductInsight = DeepPartial<ProductInsight>;

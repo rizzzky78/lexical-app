@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { ProductsResponse } from "@/lib/types/general";
@@ -43,8 +44,8 @@ export const ProductCardContainer: FC<ProductGridProps> = ({
 }) => {
   const [isContentReady, setIsContentReady] = useState(false);
   const [hovering, setHovering] = useState(false);
-  const products = content.data;
-
+  const products = content.data
+ 
   useEffect(() => {
     const timer = setTimeout(
       () => setIsContentReady(true),
@@ -77,13 +78,14 @@ export const ProductCardContainer: FC<ProductGridProps> = ({
             zoomFactor={2}
             lensSize={270}
           >
-            <Image
+            {/* <Image
               src={content.screenshot}
               alt={"Search Product"}
               width={"768"}
               height={"576"}
               quality={100}
-            />
+            /> */}
+            <img src={content.screenshot} alt="Searched Product" className="" />
           </Lens>
         </div>
       )}

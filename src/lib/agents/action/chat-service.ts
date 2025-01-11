@@ -62,7 +62,8 @@ export async function getChats(userId?: string | null) {
       "./src/debug/state/user-chat.json",
       JSON.stringify(userChat, null, 2)
     );
-    console.log("user chats state saved!");
+
+    logger.info("User chat saved!", { userId });
 
     return userChat;
   } catch (error) {
@@ -142,13 +143,8 @@ export async function saveChat(userId: string, chat: ChatProperties) {
     logger.info("User chat saved successfully!");
     return results;
   } catch (error) {
+    console.error(error);
     logger.error("Error when save the chat properties in <saveChat()>");
-
-    throw new Error(
-      error instanceof Error
-        ? error.message
-        : "Error as saving the chat propeties!"
-    );
   }
 }
 

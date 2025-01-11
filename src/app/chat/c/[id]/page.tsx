@@ -7,19 +7,15 @@ import { cache } from "react";
 
 export const maxDuration = 60;
 
-export interface SearchPageProps {
-  params: {
-    id: string;
-  };
+export interface ChatPageProps {
+  params: Promise<{ id: string }>;
 }
 
 const loadChats = cache(async (userId: string) => {
   return await getChats(userId);
 });
 
-export async function generateMetadata(props: {
-  params: Promise<{ id: string }>;
-}) {
+export async function generateMetadata(props: ChatPageProps) {
   const params = await props.params;
   const { id } = params;
 
@@ -29,9 +25,7 @@ export async function generateMetadata(props: {
   };
 }
 
-export default async function SearchPage(props: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ChatPage(props: ChatPageProps) {
   const params = await props.params;
   const { id } = params;
 
@@ -52,7 +46,7 @@ export default async function SearchPage(props: {
   return (
     <AI
       initialAIState={{
-        chatId: chat.id,
+        chatId: chat.chatId,
         messages: chat.messages,
       }}
     >

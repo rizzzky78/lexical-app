@@ -13,7 +13,7 @@ import {
   ExtendedToolResult,
 } from "@/lib/types/ai";
 import { ToolCallPart, ToolContent } from "ai";
-import { ProductsResponse } from "@/lib/types/general";
+import { ProductInsight, ProductsResponse } from "@/lib/types/general";
 import { SectionToolResult } from "@/components/kratos/section-tool-result";
 
 // Core message content types based on the existing system
@@ -54,6 +54,25 @@ const handleProductSearch = (result: string, id: string): UIStateItem => {
   };
 };
 
+const handleGetProductDetails = (id: string, result: string): UIStateItem => {
+  const resulted_getProductDetails: ExtendedToolResult<
+    { link: string; query: string },
+    ProductInsight
+  > = JSON.parse(result);
+  return {
+    id,
+    display: (
+      <div>
+        <div className="p-5 bg-muted rounded-3xl">
+          <pre className="text-xs overflow-x-auto">
+            {JSON.stringify(resulted_getProductDetails, null, 2)}
+          </pre>
+        </div>
+      </div>
+    ),
+  };
+};
+
 // Handle tool results with proper typing
 const handleToolResult = (
   toolContent: MessageContent,
@@ -62,6 +81,20 @@ const handleToolResult = (
   switch (toolContent.toolName) {
     case "searchProduct":
       return handleProductSearch(toolContent.result || "", id);
+    case "getProductDetails":
+      return {
+        id,
+        display: (
+          <div>
+            <h3>{toolContent.toolName}</h3>
+            <div>
+              <pre className="text-xs overflow-x-auto">
+                {JSON.stringify(toolContent.result, null, 2)}
+              </pre>
+            </div>
+          </div>
+        ),
+      };
     default:
       const resulted_default: ExtendedToolResult = JSON.parse(
         toolContent.result || ""
@@ -182,10 +215,18 @@ const roleHandlers: Record<
   tool: (message) => {
     if (!Array.isArray(message.content)) return [];
     const toolContent = message.content as unknown as ToolContent;
-    if (toolContent[0]?.toolName === "searchProduct") {
-      return [handleProductSearch(toolContent[0].result as string, message.id)];
+    switch (toolContent[0].toolName) {
+      case "searchProduct":
+        return [
+          handleProductSearch(toolContent[0].result as string, message.id),
+        ];
+      case "getProductDetails":
+        return [
+          handleGetProductDetails(message.id, toolContent[0].result as string),
+        ];
+      default:
+        return [];
     }
-    return [];
   },
 
   system: () => [], // Handle system messages (usually ignored in UI)

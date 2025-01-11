@@ -18,7 +18,11 @@ import {
 } from "ai/rsc";
 import { z } from "zod";
 import { ProductCardContainer } from "@/components/kratos/product-card-container";
-import { PartialRelated, ProductsResponse } from "@/lib/types/general";
+import {
+  PartialRelated,
+  ProductInsight,
+  ProductsResponse,
+} from "@/lib/types/general";
 import { xai } from "@ai-sdk/xai";
 import { RelatedMessage } from "@/components/kratos/related-message";
 import { _debugHelper } from "@/lib/utility/debug/root";
@@ -42,6 +46,10 @@ import { getServerSession } from "next-auth";
 import Image from "next/image";
 import { ObjectStreamMessage } from "@/components/kratos/testing/object";
 import logger from "@/lib/utility/logger/root";
+import {
+  PartialProductInsightDescription,
+  ProductInsightSchema,
+} from "@/lib/agents/schema/product-insight";
 
 const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
   "use server";
@@ -193,7 +201,6 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
 
             for await (const chunk of partialObjectStream) {
               streamableObject.update(chunk);
-              console.log(chunk);
             }
 
             streamableObject.done(finalizedResults);
@@ -302,9 +309,9 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
           const uiStream = createStreamableUI();
 
           uiStream.append(
-            <div>
+            <div className="my-5">
               <div>
-                <p>Proceed with Query: {link}</p>
+                <p className="line-clamp-1">Proceed with Query: {link}</p>
               </div>
             </div>
           );
@@ -314,18 +321,21 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
           const scrapeResult = await scrapeUrl({
             url: link,
             formats: ["markdown", "screenshot"],
+            waitFor: 4000,
           });
 
           if (scrapeResult.success && scrapeResult.markdown) {
             if (scrapeResult.screenshot) {
               uiStream.append(
                 <div>
-                  <div className="max-w-3xl max-h-[40rem]">
+                  <div className="my-5">
                     <Image
                       src={scrapeResult.screenshot}
                       alt={scrapeResult.metadata?.title || "product"}
-                      fill
-                      className="object-cover"
+                      width={"768"}
+                      height={"576"}
+                      quality={100}
+                      className="rounded-3xl"
                     />
                   </div>
                 </div>
@@ -334,15 +344,10 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
               yield uiStream.value;
             }
 
-            const payloadRequest = {
-              // query,
-              data: scrapeResult.markdown,
-            };
-
             const streamableObject = createStreamableValue();
 
             uiStream.append(
-              <div className="animate-pulse">
+              <div className="bg-[#343131] my-5">
                 <ObjectStreamMessage content={streamableObject.value} />
               </div>
             );
@@ -351,23 +356,28 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
 
             const payloadContent = {
               prompt: `Extract the product description with a full details. This also includes product ratings which include images and comments (if any) with a maximum of 5 product rating data (take the rating that is most helpful to the user).`,
-              data: scrapeResult.markdown,
+              markdown: scrapeResult.markdown,
             };
 
-            let finalizedObject: JSONValue = {};
+            let finalizedObject: ProductInsight = { data: {} };
 
             const { partialObjectStream } = streamObject({
               model: google("gemini-2.0-flash-exp"),
               system: SYSTEM_INSTRUCT_EXTRACTOR,
               prompt: JSON.stringify(payloadContent),
-              output: "no-schema",
+              schema: ProductInsightSchema,
               onFinish: async ({ object }) => {
-                finalizedObject = object as JSONValue;
+                finalizedObject = {
+                  data: object as PartialProductInsightDescription,
+                  screenshot: scrapeResult.screenshot,
+                };
               },
             });
 
             for await (const objProduct of partialObjectStream) {
-              finalizedObject = objProduct;
+              finalizedObject = {
+                data: objProduct,
+              };
               streamableObject.update(finalizedObject);
             }
 
@@ -380,6 +390,11 @@ const sendMessage = async (f: FormData): Promise<SendMessageCallback> => {
             );
 
             yield uiStream.value;
+
+            const payloadRequest = {
+              // query,
+              data: finalizedObject.data,
+            };
 
             let finalizedText: string = "";
 

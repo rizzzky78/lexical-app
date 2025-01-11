@@ -5,6 +5,7 @@ import { AI } from "@/app/(server-action)/action-single";
 import { getServerSession } from "next-auth";
 import { cache } from "react";
 import { getChats } from "@/lib/agents/action/chat-service";
+import { v4 } from "uuid";
 
 export const maxDuration = 60;
 
@@ -20,7 +21,7 @@ export default async function Page({
   if (!searchParams.q) {
     redirect("/chat");
   }
-  const id = generateId();
+  const id = v4();
   const session = await getServerSession();
 
   const chats = await loadChats(session?.user?.email || "anonymous");

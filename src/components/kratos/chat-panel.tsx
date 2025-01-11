@@ -66,10 +66,14 @@ function AttachBadge({ attach, onRemove }: AttachBadgeProps) {
 export function ChatPanel({ uiState, query }: ChatPanelProps) {
   //
   // const [input, setInput] = useState("");
-  const { input, attachment, onChange, detach, flush } = useSmartTextarea();
+  const { input, attachment, setInput, detach, flush } = useSmartTextarea();
   const { value, isTyping, handleChange, handleBlur, handleReset } =
     useDebounceInput();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (input) handleChange(input);
+  }, [handleChange, input]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -103,6 +107,8 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleRemove = () => {
+    setInput("");
+    handleChange("");
     detach();
     setClipboard("");
   };
@@ -161,6 +167,7 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
               <Textarea
                 ref={textareaRef}
                 name="text_input"
+                className="resize-none active:border-transparent w-full border-transparent focus:border-none hover:border-none text-sm overflow-hidden"
                 placeholder={
                   clipboard.length
                     ? "What information you want get from this product?"
@@ -170,9 +177,19 @@ export function ChatPanel({ uiState, query }: ChatPanelProps) {
                 }
                 spellCheck={true}
                 value={value}
-                onChange={handleChange}
+                onChange={(e) => handleChange(e.target.value)}
                 onBlur={handleBlur}
-                className="resize-none active:border-transparent w-full border-transparent focus:border-none hover:border-none text-sm overflow-hidden"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    if (value.trim().length === 0) {
+                      e.preventDefault();
+                      return;
+                    }
+                    e.preventDefault();
+                    const t = e.target as HTMLTextAreaElement;
+                    t.form?.requestSubmit();
+                  }
+                }}
               />
             </ScrollArea>
             <div className="flex justify-between px-1 pb-2 -mt-3">

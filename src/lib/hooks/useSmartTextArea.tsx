@@ -16,6 +16,7 @@ interface SmartTextareaState {
    * The text area regular input
    */
   input: string;
+  setInput: (text: string) => void;
   /**
    * Change Event from TextArea Element
    * @param input
@@ -50,6 +51,7 @@ interface SmartTextareaState {
  */
 export const useSmartTextarea = create<SmartTextareaState>((set) => ({
   input: "",
+  setInput: (text) => set({ input: text }),
   attachment: {},
   onChange: (e) => set({ input: e.target.value }),
   attach: (value) => set({ attachment: value }),

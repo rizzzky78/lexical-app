@@ -18,7 +18,7 @@ export type ChatProperties = {
   userId: string;
   messages: MessageProperty[];
   sharePath?: string;
-} & Record<string, any>;
+};
 
 export type UseAction = {
   sendMessage: (f: FormData) => Promise<SendMessageCallback>;

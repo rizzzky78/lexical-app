@@ -8,6 +8,7 @@ import {
   MessageProperty,
   MutationPayload,
 } from "@/lib/types/ai";
+import { _debugHelper } from "@/lib/utility/debug/root";
 
 export const mutateTool = <A = unknown, D = unknown>(
   payload: MutationPayload
@@ -42,7 +43,7 @@ export const mutateTool = <A = unknown, D = unknown>(
         {
           type: "tool-result",
           toolCallId: id,
-          toolName: "searchProduct",
+          toolName: name,
           result: JSON.stringify(constructToolResult),
         },
       ],
@@ -70,12 +71,18 @@ export const handleSaveChat = async (
 
   let chatTitle: string = "";
 
-  const currentChatData = await getChat(userId);
+  const currentChatData = await getChat(chatId);
 
   if (!currentChatData || currentChatData.title) {
     try {
       const payloadTitleMsg = messages.filter((m) => m.role !== "tool");
-      const SYSTEM_INSTRUCTION = `You are a title generation AI assistant. Given a passage of text provided by the user, your task is to compose a concise, attention-grabbing title that accurately reflects the content, with a length between 5 and 8 words. Your title should be informative, engaging, and optimized for web display. Focus on extracting the key themes and ideas from the input text, and craft a title that is both descriptive and compelling. Analyze the user's text for important keywords, central topics, and the overall narrative or message. Use this information to generate a title that is succinct, impactful, and effective at summarizing the core content in an elegant, readable format suitable for web page titles.`;
+      const SYSTEM_INSTRUCTION = `You are a title generation AI assistant.
+Given a passage of text provided by the user, your task is to compose a concise, attention-grabbing title that accurately reflects the content, with a length between 5 and 8 words.
+Your title should be informative, engaging, and optimized for web display.
+Focus on extracting the key themes and ideas from the input text, and craft a title that is both descriptive and compelling.
+Analyze the user's text for important keywords, central topics, and the overall narrative or message.
+Use this information to generate a title that is succinct, impactful, and effective at summarizing the core content in an elegant, readable format suitable for web page titles.`;
+
       const { text } = await generateText({
         model: google("gemini-1.5-flash"),
         prompt: JSON.stringify(payloadTitleMsg),
@@ -103,7 +110,7 @@ export const handleSaveChat = async (
     messages,
   };
 
-  // console.log(JSON.stringify(savePayload, null, 2));
+  _debugHelper('saved-ai-state', savePayload)
 
   await saveChat(userId, savePayload);
 };
